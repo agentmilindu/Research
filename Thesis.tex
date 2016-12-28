@@ -1,0 +1,747 @@
+\documentclass[12pt]{report}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{amsmath}
+\usepackage{listings}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\usepackage{float}
+\usepackage{gensymb}
+\usepackage{fixltx2e}
+\usepackage[utf8x]{inputenc}
+\usepackage[toc,page]{appendix}
+
+%border spacing
+\geometry{
+ a4paper,
+ lmargin = 37mm,
+ rmargin = 1in,
+ tmargin = 1in,
+ bmargin = 1in 
+ }
+ 
+%line spacing
+\renewcommand{\baselinestretch}{1.5}  
+
+\title{An efficient query platform for streaming and dynamic natural graphs}
+\author{Milindu Sanoj Kumarage}	
+
+\begin{document} 
+
+\begin{titlepage}
+\newgeometry{left=25mm}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+\begin{figure}[H]
+\centering
+\includegraphics[height=2cm]{uoc}\\[1cm]
+\end{figure}
+\center 
+{ \LARGE \bfseries An efficient query platform for streaming and dynamic natural graphs }\\[1.5cm]
+\Large Milindu Sanoj Kumarage\\
+\Large Index No: 12000752\\[1cm]
+\Large Supervisor: Dr.D.N. Ranasinghe\\[1cm]
+\Large December 2016\\[1.5cm]
+\large Submitted in partial fulfillment of the requirements of the B. Sc in Computer Science 4th year individual project\\[0.5cm] 
+\includegraphics[scale=0.06]{ucsc}
+\vfill % Fill the rest of the page with whitespace
+\end{titlepage}
+
+\pagenumbering{roman}
+\section*{Declaration}
+\addcontentsline{toc}{section}{Declaration}%
+
+I certify that this dissertation does not incorporate, without acknowledgement, any material previously submitted for a degree or diploma in any university and to the best of my knowledge and belief, it does not contain any material previously published or written by another person or myself except where due reference is made in the text. I also hereby give consent for my dissertation, if accepted, be made available for photocopying and for interlibrary loans, and for the title and abstract to be made available to outside organizations.
+
+\newpage
+
+\section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}%
+To my parents
+\newpage
+
+
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}%
+
+MORE
+
+\subsection*{Keywords}
+
+\newpage
+
+\listoffigures
+
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+
+
+
+\chapter{Introduction}
+
+\section{Preamble}
+
+Massive scale datasets are getting common in day-to-day business with the expansion of the internet. More and more devices getting connected, more and more services coming online, more and more data generated and at the same time, the need to work on these data is getting more and more prominent.
+
+\paragraph{}
+
+However, modern day datasets no longer fit into one computing node as the amount of collected data are enormously huge.  We need some kind of a grid with thousands of computing nodes which can work on the dataset parallely, which might be distributed even across many geographical areas but connected through a network, communicating and coordinate their actions.
+
+\paragraph{}
+
+In the other hand, mapping these data into graphs and using graph algorithms to query useful information out of these graphs is also a growing need. Business intelligence systems, anomaly detections systems and many more real world use cases with huge financial values exists which needs insights that could be extracted from the relationships in the graphs, which is not easy to extract from traditional databases. We know the story of Google, how it became the search giant with their PageRank\cite{PageRank} algorithm which makes use of graph relations to rank the web pages of the World Wide Web and to produce the users the most related web pages to their queries. In the same way, Facebook uses their social graph with trillion edges\cite{Facebook} to uncover new insights about their users, products, and interactions.
+
+\paragraph{}
+
+With the popularity of the use cases like above, the need of betters platforms which can perform graph computations efficiently in parallel on largely distributed clusters aroused. Query platforms makes it easier to query for data and we have seen several query platforms popping up like HiveQL which runs on Hadoop, Spark SQL which runs on Apache Spark and Gremlin which is used by several graph databases like Neo4J and Titan. Query platforms are useful when the information needed to be retrieved is dynamic, for instance, a Business Intelligence tool needs different types of information represented in different ways.
+
+\paragraph{}
+
+Another example would social networks like Facebook, Twitter, etc where we get a Feed which shows selected set of posts to a particular user that is best matching for the user’s interests at a given moment, however, with the user’s interactions with these posts shown, user’s Feed start showing different set of posts which are more related to the posts the user is much interest in. This is a Pub/Sub system, where we get different subscribers with different needs over the publications stream and the subscription space dynamically changes over the time. We see even Facebook uses\cite{Facebook} Apache Giraph which is an open-source implementation of Pregel\cite{Pregel}, which is not capable of working with streaming graphs and which does not take the characteristics of natural graphs into account. 
+
+\section{Motivation}
+
+Apache Hadoop opened up a whole new world to data analytic by enabling running Map Reduce jobs on huge clusters, and with many more other needed features like replica management for resilience, etc. However, Hadoop was for batch processing and in order to get some useful information out of it, we had to wait till the whole processing get finished. This was problematic for some scenarios, because they needed the results as soon as possible, and being late to get the data might make the information less useful. For example, an anomaly detection system for stock trading system would need to identify anomalies of the system in real time; but if we identify this anomaly only at the end of the day, after running a Hadoop job of the trades happened the whole day, then the anomaly might have caused lot of financial damages already. 
+
+\paragraph{}
+
+Businesses were happy to have a system which can do real-time analysis, even if they produce approximate results. This need produces systems like Apache Spark and Apache Flink which are streaming frameworks which can listen to the data streams and do the needed  analysis in real-time. 
+
+\paragraph{}
+
+In the meantime, people had realized these data has relationships with each other and if we can map these data into a graph, we could extract more insightful information from them. This resulted in developments of frameworks like Apache Giraph, which can can process a bulk of data and build a graph from it, then enable running different analysis on that graph. Apache Giraph was based on Google's Pregel\cite{Pregel} paper and was developed by Yahoo and Apache in collaboration. Now it is used at Facebook\cite{Facebook} for analysing their massive scale social graphs. This gives us an idea of the importance of such systems which enables us to analyse graphs.  But, these systems are like Hadoop, which are only capable of bulk processing, but not stream processing.
+
+\paragraph{}
+
+We saw the need of a graph analytic framework which can work with graph streams where the users can plug their data streams, map them to graph streams, let the graph build over time, and then analyse the graph for different informations by submitting different queries time to time.
+
+\paragraph{}
+
+Therefore, motivation of this research is to introduce a model for a graph query platform in the case of streaming graphs, and we will look into properties of natural graphs which real world systems deal with, to exploit their intrinsic characteristics to optimise the proposed model.
+
+\section{Aim} 
+Aim of this research is to introduce a model for a graph query platform which enables querying massive scale, streaming and dynamically changing synthetic  and natural graphs. This model should be able to work on top of existing distributed storages and make use of existing distributed computation approaches.
+
+\section{Objectives}
+\begin{enumerate}
+\item A graph framework for unbounded and dynamic graphs
+\item Optimise the framework for natural graphs
+\end{enumerate}
+
+\section{Research Question}
+The problem is to find an optimal model for a query platform, a graph framework which enables interacting with the graph, for a graph G, where the graph G is streaming, which implies that the graph is continuously growing by receiving the vertices and edges as a stream of data, and the graph G be natural, typically having power-law degree distributions which implies that a small subset of the vertices connects to a large fraction of the graph.
+
+\section{Scope}
+
+\section{Thesis outline}
+
+\chapter{Background}
+\section{Graphs in Real-world}
+Massive-scale graph-structured computation happens in many systems ranging from targeted advertising to natural language processing and has led to the development of several graph-parallel abstractions. 
+
+\paragraph{}
+
+One example of such system is social networks, like Facebook, Twitter where different types of interactions of users happens every second. According to the statistics, the number of active users on the Twitter social and micro blogging network is roughly 305 million by the fourth quarter of  year 2015\footnote{http://www.statista.com/statistics/282087/number-of-monthly-active-twitter-users/}. We can map interactions of users into an unbounded graph, where the graph keeps building as long as users keeps using the social network.
+
+\paragraph{}
+
+Another example is web crawlers, where the crawler through the web pages following links in the given web page. We can map web pages to vertices and properties of a particular web page as attributes of a vertex. And then we can map hyperlinks from one web page to another as an edge between the relevant vertices.  
+
+\paragraph{}
+
+One another example would be Anomaly  Detection Systems, where the system monitor different types of data like HTTP traffic, System logs, etc and trying to analyse and find the anomalies using the relationship of the data by building a graph.
+
+\section{Data-Parallel and graph-Parallel systems}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{images/image00}
+\caption{Difference between data-parallel and graph-parallel}
+\label{fig:parallel}
+\end{figure}
+
+Data-parallel systems like Hadoop, Spark, Beam, etc threats the data as sets of records and do the parallel processing. Graph-parallel systems threats the data as a graph, where data get mapped to nodes and edges to represent the relationships between data. See Figure \ref{fig:parallel}. Some examples for graph-parallel systems are Pregel, GraphLab.
+
+\section{Big Data and Big Graph}
+Big data is emerging as a hype these days as businesses has released they can generate more revenue by analysing their huge piles of data and generating better business insights,  uncover hidden patterns, correlations. 
+
+\paragraph{}
+
+With the popularity of the Big Data, the idea of using graphs to uncover relationships of data has also emerged. Experts says it is “not about finding the right answer to a question but about seeking the right question to ask."\footnote{http://www.informationweek.com/big-data/big-data-analytics/graph-analytics-the-other-big-data/d/d-id/1109724} We see tools for analysing huge graphs are getting developed.
+
+\section{Graph streams}
+MORE
+\section{Query Platforms}
+Query platforms enables developers easily query data from the graph. We often see people use tools to run queries to fetch data on the fly. We see two main types of query platforms, some like Apache Pregel, where they provide a programmatical interface and we have to write the code for the analysis process. 
+
+\paragraph{}
+
+Other type is, where they provide a query language and a query parser engine which convert the query written in query language to the analysis process. We see different type of query languages introduced for different needs. Hive SQL and Spark SQL are both for data-parallel systems while Gremlin is a query language in Apache TinkerPop stack which can be used for both graph databases (OLTP, Online transaction processing) and graph analytic systems (OLAP, online analytical processing). Building such a query platform needs different aspects taken into consideration. 
+
+\section{Graph partitioning}
+We have to accommodate graph partitioning methods to partition these generated massive-scale unbounded graphs to be assigned to  different computation nodes in order to do the analysis. Best partitions would be having less connections in between partitions, thus, will reduces the communication between partitions, which could be costly otherwise.
+
+\subsection{Edge-cut and Vertex-cut methods}
+Existing graph partitioning methods can be divided into two main categories, as edge-cut and vertex-cut methods. Edge-cut tries to evenly assign the vertices to machines by cutting the edges and vertex-cut tries to evenly assign the edges to machines by cutting the vertices.
+ 
+\subsection{Graph partitioning for Natural graphs}
+However, the natural graphs commonly found in the real-world have highly skewed power-law degree distributions, which challenge the assumptions made by abstractions like  Pregel and GraphLab, limiting performance and scalability. As natural graphs are highly skewed, there exists subset of vertices which have large number of edges. 
+
+\paragraph{}
+
+For example, a common World Wide Web crawler would find most of the web pages have average number of hyperlinks pointing to them while some web pages have massive number of hyperlinks pointing to them. 
+
+\paragraph{}
+
+When we use edge-cut approach evenly distributing vertices could result some partitions with too many edges but when we use vertex-cut approach we get edges evenly distributed across the partitions, therefore no one partition would get too much load. Therefore, vertex-cut methods can achieve better performance than edge-cut methods\cite{PowerGraph} specially for graphs that follows power-law degree distribution.
+
+\subsection{Optimal partitioning}
+	An optimal partitioning means where the communication between partitions to perform a computation is minimal and the needed computation power and storage are balanced across the partitions.
+
+\section{Graph Analysis Frameworks}
+We started analysing the currently available graph analysis frameworks to understand their internal workings, how they handle large scale graphs, queries, etc. These frameworks usually falls into two categories, as
+\begin{enumerate}
+\item OLTP (Online Transaction Processing)
+\item OLAP (Online Analytical Processing)
+\end{enumerate}
+
+Online Transaction Processing frameworks are graph databases characterized by a large number of short online transactions (INSERT, UPDATE, DELETE). Online Analytical Processing aggregated are graph databases with historical data, stored in multidimensional schemas and characterized by relatively low volume of transactions. Research interest of this research is towards Online Analytical Processing rather Online Transaction Processing. Therefore, we evaluated currently available OLAP frameworks here.
+
+\paragraph{}
+
+Most of the well known solution in the literature and industry are only capable of analysing graphs that no new vertices or edges are added to the graph over the time. These type of graphs are called bounded graphs while the graphs where new vertices and edges are inserted  over the time are called unbounded graphs or streaming graphs. 
+
+\paragraph{}
+
+Several of these solutions allow changing the graph structure, that is, how edges are connected to the vertices. These dynamically changing graphs are called dynamic graphs and others are called static graphs, where the graph structure does not change.
+
+\paragraph{}
+
+We evaluated several such graph analysis frameworks to identify their strengths and weaknesses. You can find our findings under Appendix A.
+
+\paragraph{}
+
+Almost all the solutions use some kind of graph partitioning techniques. We will be discussing some of the available graph partitioning techniques in the next subsection.  
+
+\section{Graph Partitioning algorithms}
+In graph-parallel systems, the graph is partitioned into several sub graphs across processing resources for two main reasons, first, one huge graph might not fit in one, second, if we can distributed a graph on several computational nodes, then we do the processing parallelly and get the expected results quickly.  
+
+\paragraph{}
+
+Almost all the solutions above use graph partitioning techniques to parallelize the computations. Some key aspects considered in graph partitioning is how to minimize communication and how to balance computation and storage. 
+
+\paragraph{}
+
+We evaluated several graph partitioning techniques to get an insightful understanding on graph partitioning, to evaluate their strengths and weaknesses. You can find them under Appendix B. 
+
+\section{Graph summarization}
+Graph summarization is an interesting area of graphs where we create a summary of a huge graph. We can then do our computation on the summary instead of the original graph, but what we get is an approximate result. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/image02}
+\caption{Graph summarization and result approximation}
+\end{figure}
+
+\paragraph{}
+Some highlighting properties of graph summarization are, 
+
+\begin{enumerate}
+
+\item $ | S_G | << | G |$ : the size of sketch SG is far less than the graph G, preferably in sublinear space.
+\item The time to construct SG from G is in linear time.
+\item The update cost of SG for each edge insertion/ deletion is in constant time.
+
+\end{enumerate}
+
+Some example graph sketching techniques are Count-Min and its variant gSketch. But them both can support only a limited types of graph analytics, since they are not graphs.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/image15}
+\caption{Count-Min's sketching technique visualized}
+\end{figure}
+
+
+\paragraph{}
+
+We evaluated several available graph summarization techniques in the literature and among them were different spanners, sparsifiers and sketchers techniques.  
+
+\subsection{Count-Min}
+\subsection{gSketch}
+\subsection{TCM}
+\subsection{GMatrix}
+
+\chapter{Query platform}
+
+Here we discuss the methodology of the research, the path we followed, what we investigated, what we learned and what made us pivot or continue in the path we followed.
+
+\section{Graph analysis frameworks}
+We started analysing the currently available graph analysis frameworks to understand their internal workings, how they handle large scale graphs, queries, etc.
+
+\paragraph{}
+
+MORE on Scatter gather,  message parsing, shared state. Vertex-cut/edge-cut 
+
+\paragraph{}
+
+We found most of them are only capable of analysis bounded graphs. Few of them were able to handle dynamic graphs and the others only supports static graphs. 
+
+\section{Graph partitioning}
+One reason for this is graph partitioning played a significant role in almost all of them and effective graph partitioning is easy only when we can see the whole graph. But the problem with unbounded graph is we see only a part of the graph, that is the part that has received already and without seeing the rest of the graph, we can’t guarantee an optimal partitioning.
+ 
+\paragraph{}
+
+Our objective of this research is to introduce a graph analysis framework which can work with unbounded and dynamic graphs and therefore we looked into streaming partitioning algorithms in the literature. Streaming partitioning algorithms uses heuristics to assign vertices and edges to the partitions. Something noteworthy is, if we can partition an unbounded graph using one particular streaming partitioning algorithm, then we can use the same algorithm to partition a bounded graph.
+ 
+\section{Streaming graph partitioning}
+We then studied about many streaming graph partitioning techniques and observed most of them are considering about the adjacency and balanced partitioning. Some of them focus on properties of natural graphs and trying to exploit them when partitioning. We then studied on the natural graphs and their properties to get a clear understanding on how we can use them for efficient partitioning. 
+
+\paragraph{}
+
+One problem we saw with graph partitioning  is that when we perform a computation on the graph, there happens lot of inter-partition communications. For instance, when we are running PageRank on the graph, a node which has a neighbor in another partition has to communicate with that partition to get its current PageRank. Usually there exists many such vertices and one such vertex may connect to many other neighbors which resides in other partitions. This results in many messages passed in every iteration of the PageRank algorithm. There are many such queries which needs lot of inter partition communications happen to generate the final output.
+
+\paragraph{}
+
+A graph stream of a natural graph was needed to carry out some initial evaluations. Therefore we started implementing a Twitter stream listener, where we can listen to the Tweets the Tweeters Tweet at any given moment in real-time as a data stream. Our plan was to map the data stream into a graph stream and then start building a graph. 
+
+\paragraph{}
+
+We were evaluating the Spark and Flink frameworks by the time. We first evaluated the possibility of implementing this with GraphX, Spark’s graph framework, then comprehended GraphX is not capable of handling unbounded graphs. Then we moved on to Flink’s graph analysis framework, Gelly. 
+
+\paragraph{}
+
+Same as GraphX, Gelly also was only for unbounded graphs, however, we came to know with some more digging in, there is an ongoing research to extend Gelly to support unbounded graphs. That was by a researcher from KTH, Royal Institute of Technology, Stockholm, Sweden and they have a working prototype. However, they do not build a graph from the graph stream, instead they use one pass algorithms to just filter out the informations they are interested in. 
+
+
+\section{One pass algorithms}
+
+One pass algorithms are a type of algorithms which reads its input exactly once, in order, without unbounded buffering. Some simple use cases of one pass algorithms are counting the elements, seeking the k largest or smallest elements, finding the sum, mean, variance and standard deviation of the elements, finding the most or least frequent elements, etc. 
+
+\paragraph{}
+
+However, the problem with one pass algorithms is that it is not a general way to run all the graph analysis types we know. We have to know the one pass algorithms or invent new ones for our analysis need. 
+
+\paragraph{}
+
+What they have done in their research is implementing the known algorithms, like Connected Components, Continuous Degree Aggregate, etc. They provide some basic set of operations over the graph stream like aggregation, transformations, slicing into windows, etc. But graph specific operations like traversing the neighbors are available only within a window as they don’t maintain a graph. They are using the shared states to continue the extracted information across the stream.
+
+\section{Graph summarisation}
+
+What we wanted is a more general method, where the users can perform any type of graph analysis on our platform, which is not possible with one pass algorithms. We then sought for other solutions and came across graph summarisation. The goal of graph summarisation is to produce a compressed representation of a graph. 
+
+\section{Spanners, sparsifiers and sketches}
+
+Among several summarization techniques, spanners which is for distance estimation, sparsifiers which is for cut estimation and sketches which is for homomorphic properties are the highlighting ones. We started studying about spanners, sparsifiers and sketches. MORE
+
+\paragraph{}
+
+We left out spanners and sparsifiers as they were used mainly for distance estimation and cut estimation, and what we needed was something which can represent the properties of original graph as a summary, not just distance or cuts.
+
+\paragraph{}
+
+The problem with sketching is, like one pass algorithms, sketching are also query specific. However, we found TCM sketching which promises the ability to use in general. 
+
+\section{TCM sketching}
+
+TCM introduces a sketching technique which can be used to all types of graph analysis queries in general. In the TCM paper they have shown how TCM enables us to run all 4 types of graph analysis queries, which are nodes queries, edge queries, path queries and subgraph queries. We are discussing more on TCM sketching in next section. We then implemented TCM sketching as a standalone Java application. More information on implementation could be found under Implementation section.
+
+\section{Evaluating TCM}
+
+We then wrote a web crawler which crawls the world wide web and create a graph stream about web pages and their links to other web pages. We used this graph stream to continue with our testing on TCM. 
+
+\paragraph{}
+
+We created visualizations of the building original graph and the sketches using a visualisation framework for us to get an idea. We created several sketches with several sizes and visualized. Then we started running different type of graph analysis queries on the sketches. 
+
+\section{Dynamic querying}
+
+However, we had one limitation in our system, because whenever we wanted to run a new query we have to stop the running process of building the graph and rerun changing the query. Then the graph starts building from the beginning which takes a lot of time, specially to become a  natural graph, showing power-low degree distribution. 
+
+\paragraph{}
+
+We followed two approaches here, one is we wrote our TCM implementation as a OSGi bundle, where we can keep the graph building and run any query on it dynamically, attaching to the graph. More about this could be found under Implementation section. 
+
+\paragraph{}
+
+This way, we firstly deploy the TCM graph as a OSGi bundle to the OSGi platform and then we can submit a query as a OSGi bundle to the OSGi platform. OSGi bundles are compiled into JAR files, which we can dynamically load to the OSGi platform. 
+
+\section{Simulation}
+
+Other approach was to use Snapy.py which is a graph generation library by Stanford and generate a stream of graph and build the sketches.  With Snapy.py we can generate different types of graphs and with different degree distributions. This way, we could generate and analyze both random and natural graphs.
+
+\paragraph{}
+
+We used small to medium scale graphs for initial testing, which ranges from 100 to 10,000 nodes and 1000 to 1,00,000 edges.  We did series of investingations using the graphs generatd with Snapy.py using different configurations in generating graphs and sketches. Details of them could be found under the Evaluation section.
+
+\paragraph{}
+
+Number of sketches and the size of the sketches, that is the dimensions of the adjacency matrix of the sketch has a relation between how accurate the local and the final result for the analysis. Therefore, we tried generating different sketches, with different sizes and different number of sketches and continued to analyse the accuracy. 
+
+\paragraph{}
+
+We used a node query and plotted degree distribution of the vertices of the original graph and then used the same node query and plotted degree distribution of the vertices from the sketches. We then could compare the two plots to get an idea on the effects of sketches on the accuracy. 
+
+\section{Extending TCM}
+
+The problem we understood with the TCM sketching was, we have to define the sketches beforehand. However, when working with the unbounded graphs, we don’t know how large the graph would grow. Because there is an relation between accuracy and number of sketches and sketch sizes, we saw the accuracy degrades when the graph is getting bigger. 
+
+\paragraph{}
+
+How TCM paper discuss to create a sketch is to take the full memory of the computation unit it is built on and create a sketch of that size and number of computation units available is how many sketches we create. However, when the graph is getting bigger, the accuracy keeps degrading. 
+
+\paragraph{}
+
+Creating a sketch of the size of the available memory is not a good solution in an era of cloud computation and distributed computing. We today is capable of vertically and horizontally scaling the resources available and pay as of the usage. We could start with 2GB of memory on one unit and scale up to 2TB of memory on 100s of units each.
+
+\paragraph{}
+
+As a graph analysis framework we have to handle this. This is a significant point where we have to come up with a novel idea to introduce extensions to the TCM model for automatic sketch creation. Thus we started investigation on this.
+
+\paragraph{}
+
+First we had to clarify what we consider as accuracy because definition of the accuracy is vague and changes with the type of the query. However, when looking at the fundamentals, we realized, the factor which relates to the accuracy of a TCM sketch is how many nodes of the original graph maps to a node of the sketch.
+
+\paragraph{}
+
+ For example, if the nodes of the original graph is as G[a,b,c,d,e,...] and nodes of sketch is as S[I, II, III, IV, ...,], when  we have only one node of original graph mapped to one node of sketch, as S[ I(a), II(b), III(c), IV(d),...], then the sketch is same as the original graph, whatever the query we run on sketch gives same results as the original graph. But when two nodes of the original graph shares one node of the sketch, as S[ I(a,e), II(b), III(c), IV(d),...], the accuracy might degrade. When more different nodes of the original graph maps to one node of the sketch is when the accuracy starts to fall. 
+
+\paragraph{}
+
+ However, when we create different sketches using pairwise independent hashing,  nodes of the original graph which mapped to one node of a sketch, get distributed to other nodes of another sketch. This again increases the accuracy. 
+
+\paragraph{}
+
+The main two problem was identifying when to create a new sketch and how to create a new sketch just by looking at the existing sketches. Since we hash the nodes to put into the sketches we have no way of reversing the hash and hashing again to the new sketch.
+
+\paragraph{}
+
+For example, let us say we have an edge like (u,v) and two sketches as S1 and S2 having adjacency matrices as M1 and M2 with sizes as 9 and 17 respectively.. When we insert the edge to S1 it hash both the vertices for the range of 0 to 9 and we got values 2,4 respectively. Now, we can put this edge to the sketch S1  by incrementing the value at M1[2][4]. 
+
+\paragraph{}
+
+If we insert the edge to S2 it hash both the vertices for the range of 0 to 17 and and say we get values 5,11 respectively. Now, we can put this edge to the sketch S2  by incrementing the value at M2[5][11]. But when we want to put the vertices mapped to M1[2][4] into S2’s adjacency matrices M2 and if we don’t have the original vertices at hand, we have no way of knowing  to which values these vertices maps in the S2’s adjacency matrices M2.
+
+\paragraph{}
+
+We thought about considering above two factors, number of average overlapping nodes( N ) and number of sketches( S ), and keeping them to a ratio ( like  k  ∝ N/S ) to keep the accuracy at a fixed rate, because if we consider graph density is proportional to the average overlapping nodes, we can easily calculate this and can empirically evaluate this.
+
+\paragraph{}
+
+However, we realized we can solve our two main problems, when to create a new sketch and how to create a new sketch by looking at values returned from the sketches. For example, let's say we have 4 sketches with sizes as a, b, c, d where a \textgreater  b \textgreater c \textgreater d. When we query for an edge, each sketch returns the edge value as of that sketch and  we put these values to a list like this [ 7, 4, 3, 3 ] for instance, then what we do is, get the minimum value from the list, assuming it is the correct value and return as the result of that query.
+
+\paragraph{}
+
+At the beginning, for a given edge, the sketches might return something like [ 3, 2, 2, 2 ], but when the graph is growing, the smaller sketch will get more hash collisions, thus will return something like this, [ 7, 4, 3, 3  ]. We can understand looking at this, even though the correct value is 3 here, we have one sketch which gives the value as 7. When we see something like this, where some sketches are deviated from the correct value( minimum value ), then that is the correct time to create new sketches. 
+
+\paragraph{}
+
+We don't have to run edge queries for this explicitly, because when we insert an edge, we already query for the edge first to get the current value, 
+
+   m[a,b] = m[a,b] + 1 //We check the edge value, then increment
+
+This means we do not add overhead to the system and reading edge value is a constant time operation because what we do is read the adjacency matrix. 
+
+\paragraph{}
+
+When we think further, we thought we can delay creating a new sketch until it is only one sketch out of all sketches that return the correct value. We did several experiments on this, you can find the results under Results and Evaluation section.
+
+\paragraph{}
+
+Once we know when to create a new sketch, next problem we get is how to create a new sketch. Then we investigated how can we create new sketches using the knowledge we have at hand and we saw we can do it at the same time while checking whether we have to create a new sketch.
+
+\paragraph{}
+
+Let’s say while inserting an edge,  we decide to create a new sketch by looking at sketch values. We first create a new sketch with larger size and fill it with Nulls ( ∅ ). Let’s says  the sketch values were like this [ 7, 4, 3, 3 ]. From this sketch values we get the correct value as 3 and we can set the new sketch's value for that edge as 3, making the final sketch values list as  [ 7, 4, 3, 3, 3 ]. 
+
+\paragraph{}
+
+The next time we get an another edge inserted, we might get something like this for sketch values, [ 9, 3, 2, 2, ∅ ] because we have a new sketch and its matrix is filled with ∅s mostly. Now we omit the ∅ and get 2 as the correct value and then we set the new sketch’s adjacency matrix’s corresponding cell with that value. This way, we eventually fill the new sketches with very less overhead.  
+
+\paragraph{}
+
+We implemented this automatic sketch creating mechanism and tested for the accuracy with different measures. We firstly passed an array of sketch sizes in ascending order as parameters and let the sketches create automatically, but using the first two sketch sizes as the starting sketches. Then we identified how many sketches used by the system to store the given graph stream. Then we did the experiment giving the same graph stream but instead of creating the sketches dynamically, we created the the same number of sketches with the same sketch sizes at the beginning, like previous experiments.
+
+\paragraph{}
+
+Then we compared the outputs against the original graph and against each other. Then we compared the created sketches in both mechanisms and calculated how the sketches has deviated in the auto sketch creating technique  than the non auto sketch creating technique. You can find more details on this under the Results and Evaluation chapter. 
+
+\paragraph{}
+
+In this experiment the program waited until it is just one sketch that is giving the right value to create a new sketch as we described above. We could use several other techniques like this. We see these as automatic sketch creation policies. We tried several such policies and the evaluated the results. 
+
+\paragraph{}
+
+Some such policies we tried are, without waiting until it is just one sketch giving the correct results, we tried with waiting until it is only 2 sketch giving the correct results, only 3 sketches giving the correct results, half of the sketches giving the correct results, ¼ of the sketches giving the correct results, etc.  You can find more details on this under the Results and Evaluation chapter.
+
+\paragraph{}
+
+Then we tried tolerating errors upto a limit, that is, when there is only one sketch giving the correct result, say ‘v’, we checked how many sketches are having ‘v+1’ as the sketch value. If we have one or more sketches giving ‘v+1’, then we do not create a sketch. This is useful when we do not need exact values to be in sketches, but something very approximate. We call this the tolerance, where 1-tolerance means if the correct value is ‘v’ but when we have a ‘v+1’ in the sketch values we do not create a new sketch, and 2-tolerance means we do not create a sketch when we have a ‘v+1’ or ‘v+2’ in the sketch values. In our implementation we defined n-tolerance where the user can define the tolerance they need. 
+
+\paragraph{}
+
+We can have tolerance with different policies, like  only 2 sketches giving the correct results + 2-tolerance. Then the system check if at least 2 sketch values have either ‘v’ or ‘v+1’ or ‘v+2’ if the correct value is ‘v’. We did a series of tests with different combinations and evaluated the accuracy of the queries. You can find more details on this under the Results and Evaluation chapter.
+
+\paragraph{}
+
+Since we are building a framework, we should give the users to choose which policy suits for them. Therefore, in our implementation, we have a parent class as ‘SketchCreationPolicy’ and several sketch creation policies implemented as child classes of it. This way, the user can use whatever the sketch creation policy they like when setting up the graph or write their own sketch creation policy by extending the ‘SketchCreationPolicy’ class. More on this can be found under the Implementation chapter.
+
+\paragraph{}
+
+The next question we got is, can we delete the old sketches which gets created.  
+\paragraph{}
+MORE on sketch deleting
+\paragraph{}
+MORE on initial sketch
+\paragraph{}
+MORE on sketch sizes
+\paragraph{}
+
+\section{Optimising the operations}
+We analysed our design looking for improvements, to understand where we can optimise. We saw three types of operations we do on sketches.
+
+\begin{enumerate}
+\item Reading the value of the adjacency matrix giving a row and a column ids.
+\item Summing the values along a row of the adjacency matrix to calculate the outgoing edges 
+\item Summing the values along a column of the adjacency matrix to calculate the incoming edges
+\end{enumerate}
+
+
+\paragraph{}
+
+Reading the value of the adjacency matrix given a row and a column ids is constant time operation. However, summing the values along a row of the adjacency matrix to calculate the outgoing edges or summing the values along a column of the adjacency matrix to calculate the incoming edges is a O(m) operation on a MxM adjacency matrix.
+
+\paragraph{}
+
+However, we can update the sum of the row and the column with every edge insertion in constant time, by keeping a separate list of sums. This is like having M+1 rows and columns in the adjacency matrix, where the additional row and column keeping the sums. We tried this and evaluated the performance gain when querying. 
+
+\section{Persistence}
+User might want to shutdown the system and restart later or may want to take backups time to time in any case of system crash. We should provide a way to persist the graph in the memory onto a persistent storage. 
+
+\paragraph{}
+
+What we have in memory is a set of adjacency matrices, that are 2d matrices and some meta data.  In our design, we have a persistence interface where we can plug an adaptor for any persistence method. 
+
+\paragraph{}
+
+One such easy way is dumping to a text file.  We implemented an adaptor to dump the sketches along with its metadata to a text file in both JSON and XML formats. An another convenient way we can persist the sketches is to use a database. However, we can’t fit the sketches to a relational database as there are no fix column sizes for sketches. Therefore, we have to go with a NoSQL database where there are no schemas. After some study on available NoSQL systems, we identified document family databases like MongoDB would be easily used for this. We developed an adaptor to persist the sketches along with the metadata into a MongoDB instance.
+
+\paragraph{}
+
+We see that while we are persisting the sketches, we get new edge insertions as this persisting process takes some time. Here we implemented two versions of persistence, one is blocking and other is non-blocking. In blocking persistence, we hold new edge insertions until the sketches are persisted. In non-blocking persistence we allow new edge insertions. However, we firstly create a separate copy of the sketches, like a snapshot,  in the memory by memory copying, and then use that snapshot for persisting. Java has a native method to create a copy of an array from memory block copying. 
+
+\paragraph{}
+
+In the same way, we implemented a restore functionality where we can load the sketched persisted in any of the above methods into the memory and then continue building those sketches thereafter.
+
+\chapter{Results and Evaluation}
+In this chapter we discuss how we evaluated the proposed model, our results and the important parts of our implementation. We chose Java as our implementation language as of the vast set of tools available and abundance community and references.
+
+\section{High level architecture}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{images/image01}
+\caption{High level architecture}
+\end{figure}
+
+\subsection{Graph stream interface}
+The users should be able to plug a stream of data to the systems, then a mapper which maps data into edges and vertices and input to the graph model as a graph stream.
+
+\subsection{Graph model}
+Graph model is how we represent the graph in the memory and in our system we are using graph sketches for this. 
+
+\subsection{Graph sketching}
+Building a sketch of the graph makes us summarise the huge graph into a small model. There are many sketching techniques, some techniques limits the model for specific types of queries. We used TCM sketching model as our sketching technique as it is a general purpose sketching technique.
+
+\subsubsection{Sketch creation}
+As the graph build over the time, we create new sketches according to the used sketch creation policy in order to preserve the accuracy at a reasonable level.  
+
+\subsubsection{Sketch deletion}
+As we create new sketches with higher sizes, we remove the small sketches when their contribution to the accuracy decrease.
+
+\subsection{Persistence interface}
+MORE
+
+\section{Abstract Class Diagramm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/image06}
+\caption{Abstract Class Diagramm}
+\end{figure}
+
+\section{Graph summaries}
+When implementing the adjacency matrices of the sketches, we used Java 2D arrays, as the operations we are performing on the
+ 
+\section{OSGi bundles}
+
+MORE
+
+\section{Persistence}
+
+MORE
+
+\section{Natural graphs from Webcrawler}
+Following is a web graph generated by mapping the data stream of our web crawler as a graph stream and then built the graph. Each node indicates a webpage on the World Wide Web and each edge indicates a hyperlink between two such webpages. You can see some nodes having many hyperlink while some have only few. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/web-graph}
+\caption{A large web graph generated by our web-crawler}
+\end{figure}
+
+It took us about half an hours to build this graph because crawling the web and fetching the hyperlinks from the webpage’s contents by parsing the HTML is a time consuming task. 
+
+\paragraph{}
+
+Following is a also as above graph, but a zoomed out view and with many more nodes. The red dots you see are actually groups of nodes connected together. Edges has been removed for clarity but we can get an idea about the connectivity of nodes by the closeness of the nodes. You can see there are some nodes which has very high connectivity, thus forming big groups, as the one in the top left corner. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/graph2}
+\caption[Zoomed out view of a large web graph]{Zoomed out view of a large web graph generated by our web-crawler}
+\end{figure}
+
+\section{TCM Sketching}
+While creating the above graph, we let the system create several sketches, but with very small sketch sizes, only to get us a visual representation of the sketches. First one is a sketch of size 12. The second one is a sketch of size 33. The last one is a sketch of size 112.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/s1}
+\caption{A sketch of size 12}
+\end{figure}
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/s2}
+\caption{A sketch of size 33}
+\end{figure}
+
+ 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/s3}
+\caption{A sketch of size 112}
+\end{figure}
+
+We then wanted to use the sketches and query the graph. TCM paper has defined 4 types of queries and evaluated with several experiments. We choose node queries to start with as we can  then go for interesting queries like identifying top-k heavy nodes. 
+
+\paragraph{}
+
+The most simplest node query it to ask the degree of a node giving a node id. What we did was, instead of asking random nodes, we asked every node’s degree by issuing series of node queries and using that information, we calculated the number of nodes which has a certain degree. This way we could plot a degree distribution of the graph. We did query the same from the original graph and plotted the same.
+
+\paragraph{}
+
+Following is a degree distribution plot of a graph with 100 nodes and 1000 edges. The dotted line indicate the correct degree distribution which is calculated from the original graph, while the line indicates the degree distribution calculated by querying the TCM sketches. Here we have used sketches on sizes 73, 79, 83, 89. You can see, there is a slight deviation between the two graphs but the original shape is preserved. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/dd1}
+\caption{Degree distribution from sketches of sizes 73, 79, 83, 89}
+\end{figure}
+
+You can see a drop in the low degrees and a rise in the high degrees. This happens because of the small sketches having nodes which maps too many nodes of the original graph onto them, thus increasing the adjacency matrix’s corresponding cell value. When there are such nodes in the sketch, all the nodes of the original graph which maps to those nodes gives a higher values than they have. 
+
+\paragraph{}
+
+Next two graphs are the same as above but with sketches  of sizes 89, 97 and 83, 89, 97 respectively. You can see how the degree distribution plot drawn from the TCM sketches has become more closer to the degree distribution plot drawn from the original graph. We can see the bigger size of the sketches has contributed to more accurate results comparing previous plot and next two plots. By comparing the next two plots we can see how more number of sketches has contributed to more accurate results.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/dd2}
+\caption{Degree distribution from sketches of sizes 89, 97}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/dd3}
+\caption{Degree distribution from sketches of sizes 83, 89, 97}
+\end{figure}
+
+\section{TCM Sketching for Natural graph}
+Following is a plot of degree distribution of a natural graph, which was generated from our web crawler. We time to time plotted the degree distribution of the graph by querying the sketches and from the original graph. The blue line indicate the correct degree distribution which is calculated from the original graph, while the red line indicates the degree distribution calculated by querying the TCM sketches. Here we have used sketches on sizes 11 19 71. You can see, there is a slight deviation between the two graphs but the original shape is preserved.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{images/ddn}
+\caption{Degree distribution of a streaming natural graph from sketches of sizes 11, 19, 71}
+\end{figure}
+
+\section{Automatic sketch creation}
+Here are the results of automatics sketch creation experiments. A series of experiments were carried out as this is where our extension to the TCM model comes in. 
+
+\paragraph{}
+
+First experiment uses the node queries as in the previous experiments and calculate the degree distribution by asking every node in the graph for its degree. The experiment uses ‘only one sketch gives correct value’ policy with 0 tolerance. Here the MORE
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/ddas1}
+
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.8]{images/ddas2}
+
+\end{figure}
+
+\chapter{Conclusion and Future Work }
+
+
+\newpage
+\begin{appendices}
+
+
+\chapter{Graph Analysis Frameworks}
+
+\input{GraphFrameworks}
+
+\chapter{Graph Partitioning algorithms}
+
+\input{GraphPartitioning}
+
+
+\end{appendices}
+
+
+\begin{thebibliography}{1}
+
+  \bibitem{PageRank} Page, L., Brin, S., Motwani, R.,  Winograd, T. (1998). The PageRank Citation Ranking: Bringing Order to the Web. World Wide Web Internet And Web Information Systems, 54(1999-66), 1–17. http://doi.org/10.1.1.31.1768
+  \bibitem{TwitterStats} http://www.statista.com/statistics/282087/number-of-monthly-active-twitter-users/
+  \bibitem{Facebook} Ching, A., Edunov, S., Kabiljo, M., Logothetis, D.,  Muthukrishnan, S. (2015). One Trillion Edges : Graph Processing at Facebook-Scale. Vldb, 8(12), 1804–1815. http://doi.org/10.14778/2824032.2824077
+  
+  \bibitem{PowerGraph} Gonzalez, Joseph E et al. "Powergraph: Distributed graph-parallel computation on natural graphs." Presented as part of the 10th USENIX Symposium on Operating Systems Design and Implementation (OSDI 12) 2012: 17-30.
+
+  \bibitem{Pregel}  Malewicz, Grzegorz et al. "Pregel: a system for large-scale graph processing." Proceedings of the 2010 ACM SIGMOD International Conference on Management of data 6 Jun. 2010: 135-146.
+
+  \bibitem{Graphlab} Low, Yucheng et al. "Graphlab: A new framework for parallel machine learning." arXiv preprint arXiv:1408.2041 (2014).
+  
+  \bibitem{DistributedGraphLab} Low, Y., Gonzalez, J., Kyrola, A., Bickson, D.,  Guestrin, C. (2011). Distributed GraphLab: A Distributed Framework for Machine Learning in the Cloud, 716–727. http://doi.org/10.14778/2212351.2212354
+  
+  \bibitem{S-PowerGraph} Xie, Cong, Wu-Jun Li, and Zhihua Zhang. "S-PowerGraph: Streaming Graph Partitioning for Natural Graphs by Vertex-Cut." arXiv preprint arXiv:1511.02586 (2015).
+  
+  \bibitem{Graphbuilder} Jain, Nilesh, Guangdeng Liao, and Theodore L Willke. "Graphbuilder: scalable graph etl framework." First International Workshop on Graph Data Management Experiences and Systems 23 Jun. 2013: 4.
+  \bibitem{Linear Embedding} Aydin, Kevin, MohammadHossein Bateni, and Vahab Mirrokni. "Distributed Balanced Partitioning via Linear Embedding." arXiv preprint arXiv:1512.02727 (2015).
+  \bibitem{MinLA} Goldschmidt, Olivier, and Dorit S Hochbaum. "Polynomial algorithm for the k-cut problem." (1988): 444-451.
+  \bibitem{Titan} "big graph data with cassandra - DataStax." 2012. 25 May. 2016 http://www.datastax.com/wp-content/uploads/2012/08/C2012-Titan-MatthiasBroecheler.pdf
+  \bibitem{GiraphPlusPlus} Tian, Y., Balmin, A., and Corsten, S. (2013). From "think like a vertex" to "think like a graph." Proceedings of the VLDB Endowment, 7, 193–204. http://doi.org/10.14778/2732232.2732238
+  \bibitem{GraphX} Xin, R. S., Gonzalez, J. E., Franklin, M. J., Stoica, I.,  AMPLab, E. (2013). GraphX: A Resilient Distributed Graph System on Spark. First International Workshop on Graph Data Management Experiences and Systems. http://doi.org/10.1145/2484425.2484427
+  \bibitem{Fennel} Tsourakakis, C., Gkantsidis, C., Radunovic, B.,  Vojnovic, M. (2014). Fennel: Streaming graph partitioning for massive scale graphs. Proceedings of the 7th ACM International Conference on Web Search and Data Mining, 333–342. http://doi.org/10.1145/2556195.2556213
+  \bibitem{GraphSketches}Kook Jin Ahn, Sudipto Guha, and Andrew McGregor. 2012. Graph sketches: sparsification, spanners, and subgraphs. In Proceedings of the 31st ACM SIGMOD-SIGACT-SIGAI symposium on Principles of Database Systems (PODS '12), Markus Krötzsch (Ed.). ACM, New York, NY, USA, 5-14. DOI=http://dx.doi.org/10.1145/2213556.2213560
+  \bibitem{Kalavri} Kalavri, V. (n.d.). Batch and Stream Graph Processing with Apache Flink.
+  \bibitem{TCM} Tang, N., and Chen, Q. (2016). Graph Stream Summarization From Big Bang to Big Crunch. [SIGMOD]
+  
+  
+  
+\end{thebibliography}
+\end{document}

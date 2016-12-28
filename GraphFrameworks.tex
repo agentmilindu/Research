@@ -1,0 +1,37 @@
+\section{Pregel}
+Pregel\cite{Pregel} is a graph framework for graph-parallel computations, where the computation is expressed as a sequence of steps, called ’supersteps’. In each step, a vertex receives a message from the previous step, changes its state and pass the message to the other vertices. Computation finishes when all the vertices are done and no more messages are passed. Since Pregel is a synchronous system, it updates parameters of each vertices in parallel using values from the previous step as input. One computation will take several rounds, that is several supersteps to complete. Partitioning of the graph is done by simply using a hash function on vertex ID as `partition = hash(ID) mod N` where the ID is the vertex ID and N is the number of partitions. 
+ 
+\section{GraphLab}
+GraphLab\cite{Graphlab} was introduced for dynamic and asynchronous graph-parallel computation. GraphLab consists of a Data Graph which holds the program state, an Update Function which is a stateless procedure that updates the Data Graph in small chunks called Scopes and a Sync Function which concurrently maintains global aggregates. Different hash functions are used to partition the graph. 
+
+
+\section{Apache Giraph}
+Giraph is an open source implementation of Google’s Pregel\cite{Pregel} graph processing architecture by Yahoo and Apache community. It is used at Facebook to analyse their huge one trillion edges graphs\cite{Facebook} formed by users and their interactions. Facebook has proposed several implementation-wise improvements in a paper\cite{Facebook}  published in 2015 such as how to keep vertices and edges in memory as pages instead objects to avoid Java Garbage Collector issues, how to run the processing in parallel with local multithreading to take advantage of additional CPU cores.
+ 
+\section{Giraph++}
+Giraph++\cite{GiraphPlusPlus} is an improved version of Apache Giraph which is an open source  implementations of Pregel which is graph centric rather vertex centric. Main difference between Pregel and Giraph++ is, in Giraph, the programmer can access the whole sub-graph in a partition, rather one vertex at a time.In Giraph++ each partition contains a set of vertices and all their outgoing edges. Each vertex is uniquely identified by an ID, and a partitioner decides which partition a vertex belongs to based on its ID. The partitioner is also used to route messages for a vertex correctly to its partition. The default partitioner is a hash function on the vertex ID.
+
+\section{Apache Spark’s GraphX}
+Apache Spark is a very popular open source cluster computing framework for large-scale data processing. However, Apache Spark is micro-batching based and not truly real-time. 
+
+\paragraph{}
+
+Apache Spark’s graph abstraction package GraphX has gained lot of attention in the developer community for their graph based computational needs. GraphX also uses Pregel, but its own optimized variant of Pregel, in its underneath implementation.
+
+\paragraph{}
+
+GraphX is a thin layer on top of Spark for graph processing. GraphX simplify graph computation to a specific join-map-group-by dataflow pattern. Vertex-cut partitioning is used to encode graphs as horizontally partitioned collections. 
+
+\section{Apache Flink’s Gelly}
+Apache Flink is a relatively new data stream processing framework like Apache Spark, but has gained a lot of attention recently in the developer and research communities. Like Apache Spark, Flink is a streaming framework where we can plug different data streams and run different types of data analysis jobs on it. 
+
+\paragraph{}
+
+Apache Flink have a graph framework called Gelly, which run on top of Flink, like Apache Spark has GraphX. However, Gelly is only for static graph processing. 
+
+\paragraph{}
+
+However, there is a research on how to extend to Gelly to support streaming. They have used Flink’s shared states to continue the graph across iterations of the stream. We will be discussing that under One Pass Algorithms. 
+
+\section{Titan}
+Titan\cite{Titan} is a distributed graph database engine of OLTP type, build on top of Cassandra as the underlying data storage, but which now supports other data storage systems like HBase and BerkeleyDB. Titan natively supports the Gremlin Server component of the Tinkerpop stack. Titan’s storage model is an adjacency list in a column family where row key is vertex id. Titan maintains indexes in a separate column family and one nice feature of Titan is its ability to accommodate third party tools like Elasticsearch, Lucene, etc for indexing. 
