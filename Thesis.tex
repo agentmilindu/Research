@@ -766,6 +766,32 @@ Following is a plot of degree distribution of a natural graph, which was generat
 
 All the above experiments involved a series of node queries in each experiment and the results looked promising when visually compared. At this point, defining measures to evaluate the accuracy of the queries was needed. 
 
+\section{Evaluation Matrices}
+Number of queries running on the sketches giving the exact correct results as running on the original graph could be calculated easily, however, as the research is interested not only in exact correct results, but also in approximate results, this could niot be used as a good measurement. Thus, better matrices were needed.
+
+\paragraph{}
+
+Average Relative Error and Number of Effective Queries was burrowed from gSketch paper. TCM paper also has used Average Relative Error as a measurement. 
+
+\subsection{Average Relative Error}
+Average Relative Error is used for the set of queries that returns estimated frequencies, such as edge or node counts.
+
+\paragraph{}
+
+Relative error is defined as, 
+
+\begin{equation}
+er(Q) =  \frac{\tilde{f}'(Q) - f(Q)}{f(Q)} = \frac{\tilde{f}'(Q)}{f(Q)} -1 
+\end{equation}
+
+\paragraph{}
+
+Given a set of m queries, $\{ Q_1 , ....., Q_m \}$, average relative error is defined by averaging the relative errors over all queries $Q_i$ for i ∈ [1,m] as,
+
+\begin{equation}
+e(Q) =  \frac{\sum_{i=1}^{k} er(Q_i)}{m}
+\end{equation}
+
 \section{Automatic sketch creation}
 Here are the results of automatics sketch creation experiments. A series of experiments were carried out as this is where our extension to the TCM model comes in. 
 
