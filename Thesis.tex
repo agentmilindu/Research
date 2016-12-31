@@ -792,24 +792,190 @@ Given a set of m queries, $\{ Q_1 , ....., Q_m \}$, average relative error is de
 e(Q) =  \frac{\sum_{i=1}^{k} er(Q_i)}{m}
 \end{equation}
 
+\subsubsection{Number of Effective Queries}
+Average relative error could be biased measure if queries have significantly different frequencies. For instance, if an edge with low frequency happens to collide with another edge with very high frequency in the sketch, this will results in very large average relative errors. That is, a small number of such queries may dominate the overall average relative error in query estimation.
+
+\paragraph{}
+
+Here a query is said to be effective if the error, $\tilde{f}'(Q) - f(Q), < G_0$,  where $G_0$ is a predefined value. In our experiments, the number of queries which gives effective results having $G_0$ as 0, 1, 2, 3, 4 was calculated and then the percentage of such effective queries dividing by number of all queries, $|Q|$, performed was derived. 
+
+\paragraph{}
+
+\begin{equation}
+g(Q) =  \frac{\left | \{\,q\, |   \left |\tilde{f}'(q) - f(q)\right | \leq G_0, \,q \, \epsilon  \,Q\} \, \right|}{|Q|}*100
+\end{equation}
+
+\paragraph{}
+ 
+Then these matrices were used in the next set of experiments to measure the accuracy of the sketching. The same experiment as the previous ones was performed but with more nodes, edges and queries. This is because the matrices takes averages, and for averages to be unbiased, more trials were needed, which means more queries were needed.
+
+\section{Evaluating with defined matrices}
+
+This experiment was performed with 1000 nodes and 10,000 edges graph, and then running 1000 node queries on the graph.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/n1000-e10000-sketches-810-820-823-827-830plot}
+\caption[1000 nodes 10,000 edges with sketches of sizes 810, 820, 827, 830]{Degree distribution calculated on a graph with 1000 nodes 10,000 edges using set of sketches of sizes 810, 820, 827, 830}
+\end{figure}
+
+Then the matrices were calculated, which are Average Relative Error(ARE), Percentages of Effective Queries when $G_0$ is 0 (which is the number of queries giving the exact results), $G_0$ is 1, $G_0$ is 2 and $G_0$ is 3.
+
+\paragraph{}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+ ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 \\ \hline
+163.86 &   82.6  &   82.8  &   82.8  &   83.5  \\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching}
+\end{table}
+
+
+The experiment shows $82.6\%$ of the queries gave the exact same results and within $\pm3$ range approximation, there were $83.5\%$ queries giving correct results.
+
 \section{Automatic sketch creation}
 Here are the results of automatics sketch creation experiments. A series of experiments were carried out as this is where our extension to the TCM model comes in. 
 
 \paragraph{}
 
-First experiment uses the node queries as in the previous experiments and calculate the degree distribution by asking every node in the graph for its degree. The experiment uses ‘only one sketch gives correct value’ policy with 0 tolerance. Here the MORE
+First experiment used the node queries as in the previous experiments and calculated the degree distribution by asking every node in the graph for its degree. The experiment used ‘only one sketch gives correct value’ policy with 0 tolerance and 2 initial sketches of sizes 870, 910.
+
+\paragraph{}
+
+Here the automatic sketch creation was firstly run and then the number of sketches created and their sizes used was identified. Then the same experiment was done with the used number of sketches and with their respective sizes. 
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{images/ddas1}
-
+\includegraphics[scale=0.6]{images/ddas1}
+\caption{Without automatic sketch creation, 1000 nodes, 10000 edges}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{images/ddas2}
-
+\includegraphics[scale=0.6]{images/ddas2}
+\caption{With automatic sketch creation, 1000 nodes, 10000 edges}
 \end{figure}
+
+The results were satisfying when the two plots were visually compared and the next step was to do the same experiment with our defined accuracy matrices. 
+
+\paragraph{}
+
+In this experiment it was a graph with 1000 nodes and 10,000 edges was used with 'only two sketch gives correct value' policy with 0 tolerance and 2 initial sketches of sizes 810, 820. Automatic sketch creation mechanism had created altogether 5 sketches at the end with sizes 810, 820, 823, 827, 830.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/AS-2init-2scale-0t-n1000-e10000-sketches-811-821-823-827-829plot}
+\end{figure}
+
+The accuracy matrices were as follows, 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+ ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 &  $G_0$=3 & $G_0$=4 \\ \hline
+200.80 &   58.5  &  65.8   &   73.3  &   79.8   &   81.8 \\ \hline
+\end{tabular}
+\caption{Accuracy matrices with automatic sketch creation}
+\end{table}
+
+Then the next experiment was done using the same number of sketches with same sizes, but without automatic creation, that is creating at the beginning. This way, we can benchmark the results of the automatic sketch creation with the results of the TCM with respect to accuracy measures. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/MS-n1000-e10000-sketches-811-821-823-827-829plot}
+\caption{1000 nodes, 10000 edges graph using sketches of sizes 810, 820, 823, 827, 830, without auto sketch creation}
+\end{figure}
+
+The accuracy matrices were as follows,
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+ ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 & $G_0$=4\\ \hline
+172.74 &   80.9  &   81.1  &   81.9  &   82.3  & 83.3   \\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching without auto sketch creation}
+\end{table}
+
+The resulted Average Relative Error from the experiment which used automatic sketch creation, which is 200.80 was reasonable when compared to Average Relative Error  of the experiment which did not used the automatic sketch creation. 
+
+\paragraph{}
+
+How the effective queries are distributed over the error space was plotted and it gave the idea that many queries were in a favourable error range and very few queries were much deviated.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/deviation-plot-AS-2init-2scale-0t-n1000-e10000-sketches-811-821-823-827-829-839plot}
+\caption{ Effective queries against the error space }
+\end{figure}
+
+Then the next question was, if these effective queries are really effective? Let's say a degree of a node is 12 and the query gives it as 10, that is within an error of 2, which is acceptable. Let's take this as case 1. But if a degree of a node is 3 and the query gives it as 1, which is still within an error of 2, then this might not be acceptable for some needs. Let's take this as case 2.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.4]{images/Effective-queries-when-G-is-2}
+\caption{Two cases of effective queries}
+\end{figure}
+
+\paragraph{}
+
+Then this was investigated using a plot which evaluates the frequency of approximated queries over the degrees. In Figure \ref{fig:effective-queries-against-degree}, frequency of effective queries when $G_0$ is 1 are marked with the green line, frequency of effective queries when $G_0$ is 2 are marked with the orange line, frequency of effective queries when $G_0$ is 1 are marked with the purple line. 
+
+This shows us the queries which were considered as effective are how effective. The queries which were considered effective when $G_0 = 1$ is starting from degree 3, which means, it is only the case where 3 is approximated to 2, is reasonable. Even the frequency of such approximated queries are low for smaller degrees. Majority of the queries which are considered as effective by approximation are on higher degrees, which is the case like 12 getting as 10.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/deviation-plot-error-AS-2init-2scale-0t-n1000-e10000-sketches-811-821-823-827-829plot}
+\label{fig:effective-queries-against-degree}
+\caption{ Effective queries against the degrees }
+\end{figure}
+
+As node queries were analysed to a greater extent, next move was to analyse how the system works for other types of queries. For the next analyses, edge queries were chosen.
+
+For the edge query experiment, the sketches were asked for the edge value giving two vertices. In the initial experiments, 10\% of the edges on the original graph were chosen randomly and then queried from the sketches. This way, when the graph has 1000 edges, 100 queries get performed in one experiment, and when graph has 10000 edges, 1000 queries get performed.
+
+First experiment was done using 1000 nodes and 10000 edges and using sketches 79, 83, 89. Number of Effective Queries were used as the accuracy measurements.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+97.3  &   99.99  &   100.0\\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching with edge queries}
+\end{table}
+
+These results shows us the edge queries can produce quite accurate results. In order to compare with the node queries, the same sketches with same sizes was used and experiment used for node queries was performed. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+70.0  &   71.0  &   71.0\\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching with node queries}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+1000 & 5000  & 99.44   & 100.00  & 100.00  \\ \hline
+1000 & 10000 & 93.38   & 99.90   & 100.00  \\ \hline
+1000 & 20000 & 66.25   & 95.57   & 99.77   \\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching with edge queries on series of experiments}
+\label{my-label}
+\end{table}
+
 
 \chapter{Conclusion and Future Work }
 
