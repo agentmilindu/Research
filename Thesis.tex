@@ -317,21 +317,47 @@ Count-Min\cite{CountMin} improves Frequency Counts  by using multiple hash funct
 
 TCM introduce a graphical sketch where a graph $S_G$(V, E), where V denotes the set of vertices and E its edges, is the summary of the graph G(V,E) and $|S_G| << |G|$. TCM promises a graph analytical method M which needs to run over a graph stream G, denoted as M(G), one can run it directly on its sketch $S_G$, M($S_G$), to get an approximate result, without modifying the method M.
 
-In the TCM model, a sketch denotes an adjacency matrix of size m, which is called the sketch size. A set of such sketches are maintained, and when queried for information, the query is run on all the sketches simultaneously and the results from each sketch is merged to produced the final output. 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{images/graph-sketching}
+\caption{Example TCM sketch for a graph}
+\end{figure}
 
+\paragraph{}
 
-\subsection{GMatrix}
-\cite{GMatrix} MORE
+In the TCM model, a sketch denotes an adjacency matrix of size m, which is called the sketch size. A set of such sketches are maintained, and when queried for information, the query is run on all the sketches simultaneously and the results from each sketch is merged to produced the final output. Merging the results of the sketches is done by using a aggregation function, which could be min(), max(), count() or any other. 
+
+\paragraph{}
+
+That is, for a given graph analytic method M to run on G, that is M(G), it is possible to run M on each n sketch separately, and then merge the result as follows, where $\tilde{M}(G)$ is the estimated result over G, and $\Gamma()$ is an aggregation function 
+
+\paragraph{}
+
+\begin{equation}
+\tilde{M}(G) = \Gamma(M(S_1), ......., M(S_n))
+\end{equation}
+
+When an edge query is given, which can be denoted as $f_e(a,b)$ where a and b are node ids, the resulting approximated value, which is denoted as $\tilde{f}_e(a,b)$, could be calculated like as follows.
+
+\begin{enumerate}
+\item First  estimate edge weight $M_i[h(a)][h(b)] $ where $M_i[h(a)][h(b)]$ is the cell value relative to position h(a) and h(b) in adjacency matrix $M_i$ and h is the hash function.
+\item Then uses a corresponding function $\Gamma()$ to merge them values from each matrix $M_i$.
+\end{enumerate}
+ 
+We can denote it as follows, 
+
+\begin{equation}
+\tilde{f_e}(a,b) = \Gamma(M_1[h(a)][h(b)], ......., M_n[h(a)][h(b)])
+\end{equation}
+
+You can see that estimating the aggregate weight of an edge query is in O(n) time, where n is a constant.
+
 
 \chapter{Query platform}
 
 
 \section{Graph analysis frameworks}
 We started analysing the currently available graph analysis frameworks to understand their internal workings, how they handle large scale graphs, queries, etc.
-
-\paragraph{}
-
-MORE on Scatter gather,  message parsing, shared state. Vertex-cut/edge-cut 
 
 \paragraph{}
 
@@ -792,7 +818,7 @@ Given a set of m queries, $\{ Q_1 , ....., Q_m \}$, average relative error is de
 e(Q) =  \frac{\sum_{i=1}^{k} er(Q_i)}{m}
 \end{equation}
 
-\subsubsection{Number of Effective Queries}
+\subsection{Number of Effective Queries}
 Average relative error could be biased measure if queries have significantly different frequencies. For instance, if an edge with low frequency happens to collide with another edge with very high frequency in the sketch, this will results in very large average relative errors. That is, a small number of such queries may dominate the overall average relative error in query estimation.
 
 \paragraph{}
@@ -868,6 +894,7 @@ In this experiment it was a graph with 1000 nodes and 10,000 edges was used with
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{images/AS-2init-2scale-0t-n1000-e10000-sketches-811-821-823-827-829plot}
+\caption{1000 nodes and 10,000 edges was used with 'only two sketch gives correct value' policy}
 \end{figure}
 
 The accuracy matrices were as follows, 
@@ -937,6 +964,8 @@ This shows us the queries which were considered as effective are how effective. 
 
 As node queries were analysed to a greater extent, next move was to analyse how the system works for other types of queries. For the next analyses, edge queries were chosen.
 
+\section{Experimenting with edge queries}
+
 For the edge query experiment, the sketches were asked for the edge value giving two vertices. In the initial experiments, 10\% of the edges on the original graph were chosen randomly and then queried from the sketches. This way, when the graph has 1000 edges, 100 queries get performed in one experiment, and when graph has 10000 edges, 1000 queries get performed.
 
 First experiment was done using 1000 nodes and 10000 edges and using sketches 79, 83, 89. Number of Effective Queries were used as the accuracy measurements.
@@ -963,6 +992,8 @@ $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 \caption{Accuracy matrices for sketching with node queries}
 \end{table}
 
+Then a series of experiment was performed with different edge sizes and the accuracy matrices were measured. Following are the some of the results.  
+
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|l|l|l|}
@@ -975,6 +1006,34 @@ n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 \caption{Accuracy matrices for sketching with edge queries on series of experiments}
 \label{my-label}
 \end{table}
+
+\section{Auto sketch creation with Edge Queries}
+
+Now the automatic sketch creation was evaluated on edge queries with the accuracy matrices. The experiment used a graph of 1000 nodes and 10000 edges. Initial sketches were of sizes 73 and 79. 'only two sketch gives correct value' policy was used with 0 tolerance. The auto sketch creation mechanism had created 10 more sketches with sizes 83, 89, 111, 127, 137, 142, 157, 177, 191, 219.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+99.23  &   100.0  &   100.0\\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching with edge queries using auto sketch creation}
+\end{table}
+
+Then the same experiment was carried out using the same number of sketches and same sketch sizes, but without automatic sketch creation, that is creating all the sketches at the beginning. The results were as follows.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+99.98  &   100.0  &   100.0\\ \hline
+\end{tabular}
+\caption{Accuracy matrices for sketching with edge queries without using auto sketch creation}
+\end{table}
+
+The results shows us the automatic sketch creation also gives better results for edge queries.
 
 
 \chapter{Conclusion and Future Work }
