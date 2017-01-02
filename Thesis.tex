@@ -56,6 +56,10 @@
 
 I certify that this dissertation does not incorporate, without acknowledgement, any material previously submitted for a degree or diploma in any university and to the best of my knowledge and belief, it does not contain any material previously published or written by another person or myself except where due reference is made in the text. I also hereby give consent for my dissertation, if accepted, be made available for photocopying and for interlibrary loans, and for the title and abstract to be made available to outside organizations.
 
+
+
+I, Dr. D.N. Ranasinghe, certify that I supervised this thesis entitled ”An efficient query platform for streaming and dynamic natural graphs” is conducted by M.S.Kumar I recommend this thesis to the University of Colombo School of Computing in partial fulfilment of the requirement of the degree of Bachelor of Science (Computer Science).
+
 \newpage
 
 \section*{Acknowledgements}
@@ -73,9 +77,11 @@ On the other hand, stream processing gaining lot of attention as they provides a
 
 This research evaluates the currently available graph analysing frameworks and identifies their strengths and weaknesses. Then proposes a query platform model for streaming graphs by researching and evaluating techniques and approaches which can be used for building such query platform. 
 
-Then the research propose extensions to the TCM model for automatic sketch creation and deletion while the graph is building and optimisations which makes the operations of the query platform efficient.
+We identified graph summarization as a good technique for such a query platform and discovered TCM sketching as a graph summarizasion model which fits our needs. Then we implemented our model using TCM sketching and evaluated the model with different metrics like Average Relative Error, Number of Effective Queries, Effectiveness of Effective Queries, Confusion Matrix of queries on streaming graphs. Then we evaluate the same with dynamically changing graphs and natural graphs which follows power-low degree distribution. We introduce optimisations which makes the operations of the query platform efficient.
 
-\subsection*{Keywords}
+Then the research propose extensions to the TCM model for automatic sketch creation while the graph is building and evaluate the success when using different sketch creation policies. Then we evaluate the contribution of different queries on the accuracy of the automatic sketch creation. Finally we discuss the memory usage and efficiency of the model. 
+
+\textbf{Keywords:} Streaming, graph,  
 
 \newpage
 
@@ -110,11 +116,11 @@ With the popularity of the use cases like above, the need of betters platforms w
 
 \paragraph{}
 
-Another example would social networks like Facebook, Twitter, etc where a Feed which shows selected set of posts to a particular user that is best matching for the user’s interests at a given moment, however, with the user’s interactions with these posts shown, user’s Feed start showing different set of posts which are more related to the posts the user is much interest in. This is a Pub/Sub system, where a different subscribers with different needs over the publications stream and the subscription space dynamically changes over the time. Even Facebook uses\cite{Facebook} Apache Giraph which is an open-source implementation of Pregel\cite{Pregel}, which is not capable of working with streaming graphs and which does not take the characteristics of natural graphs into account. 
+Another example would social networks like Facebook, Twitter, etc where a Feed which shows selected set of posts to a particular user that is best matching for the user’s interests at a given moment, however, with the user’s interactions with these posts shown, user’s Feed start showing different set of posts which are more related to the posts the user is much interest in. This is a Pub/Sub system, where a different subscribers with different needs over the publications stream and the subscription space dynamically changes over the time\cite{Horawalavithana}. Even Facebook uses\cite{Facebook} Apache Giraph which is an open-source implementation of Pregel\cite{Pregel}, which is not capable of working with streaming graphs and which does not take the characteristics of natural graphs into account. 
 
 \section{Motivation}
 
-Apache Hadoop opened up a whole new world to data analytic by enabling running Map Reduce jobs on huge clusters, and with many more other needed features like replica management for resilience, etc. However, Hadoop was for batch processing and in order to get some useful information out of it, we had to wait till the whole processing get finished. This was problematic for some scenarios, because they needed the results as soon as possible, and being late to get the data might make the information less useful. For example, an anomaly detection system for stock trading system would need to identify anomalies of the system in real time; but if this anomaly was identified only at the end of the day, after running a Hadoop job of the trades happened the whole day, then the anomaly might have caused lot of financial damages already. 
+Apache Hadoop opened up a whole new world to data analytic by enabling running Map Reduce jobs on huge clusters, and with many more other needed features like replica management for resilience, etc. However, Hadoop was for batch processing and in order to get some useful information out of it, we had to wait till the whole processing get finished. This was problematic for some scenarios, because they needed the results as soon as possible, and being late to get the data might make the information less useful. For example, an anomaly detection system for stock trading system would need to identify anomalies of the system in real time; but if this anomaly was identified only at the end of the day, after running a Hadoop job on the trades happened the whole day, then the anomaly might have caused lot of financial damages already. 
 
 \paragraph{}
 
@@ -132,7 +138,7 @@ We saw the need of a graph analytic framework which can work with graph streams 
 
 Therefore, motivation for this research was to introduce a model for a graph query platform in the case of streaming graphs, and we will look into properties of natural graphs which real world systems deal with, to exploit their intrinsic characteristics to optimise the proposed model.
 
-\section{Aims and Objectives} 
+\section{Aims} 
 Aim of this research was to introduce a model for a graph query platform which enables querying massive scale, streaming and dynamically changing synthetic  and natural graphs. This model should be able to work on top of existing distributed storages and make use of existing distributed computation approaches. 
 
 \section{Objectives}
@@ -180,7 +186,7 @@ One another example would be Anomaly  Detection Systems, where the system monito
 Data-parallel systems like Hadoop, Spark, Beam, etc treats the data as sets of records and do the parallel processing. Graph-parallel systems treats the data as a graph, where data get mapped to nodes and edges to represent the relationships between data. See Figure \ref{fig:parallel}. Some examples for graph-parallel systems are Pregel, GraphLab.
 
 \section{Big Data and Big Graph}
-Big data is emerging as a hype these days as businesses has released they can generate more revenue by analysing their huge piles of data and generating better business insights,  uncover hidden patterns, correlations. 
+Big data is emerging as a hype these days as businesses has realised they can generate more revenue by analysing their huge piles of data and generating better business insights,  uncover hidden patterns, correlations. 
 
 \paragraph{}
 
@@ -266,9 +272,9 @@ Some highlighting properties of graph summarization are,
 
 \begin{enumerate}
 
-\item $ | S_G | << | G |$ : the size of sketch SG is far less than the graph G, preferably in sublinear space.
-\item The time to construct SG from G is in linear time.
-\item The update cost of SG for each edge insertion/ deletion is in constant time.
+\item $ | S_G | << | G |$ : the size of sketch $S_G$ is far less than the graph G, preferably in sublinear space.
+\item The time to construct $S_G$ from G is in linear time.
+\item The update cost of $S_G$ for each edge insertion/ deletion is in constant time.
 
 \end{enumerate}
 
@@ -309,11 +315,11 @@ Frequency Counts\cite{frequency counts} is a simple sketching technique over gra
 \label{fig:EdgeSketches}
 \end{figure}
 
-Frequency Counts lacks the ability to respond to connectivity queries as the connectivity of the graph is not preserves in the sketches\cite{TCM}.
+Frequency Counts lacks the ability to respond to connectivity queries as the connectivity of the graph is not preserved in the sketches\cite{TCM}.
 
 \subsection{TCM}
 
-TCM introduce a graphical sketch where a graph $S_G$(V, E), where V denotes the set of vertices and E its edges, is the summary of the graph G(V,E) and $|S_G| << |G|$. TCM promises a graph analytical method M which needs to run over a graph stream G, denoted as M(G), one can run it directly on its sketch $S_G$, M($S_G$), to get an approximate result, without modifying the method M.
+TCM\cite{TCM} introduce a graphical sketch where a graph $S_G$(V, E), where V denotes the set of vertices and E its edges, is the summary of the graph G(V,E) and $|S_G| << |G|$. TCM promises a graph analytical method M which needs to run over a graph stream G, denoted as M(G), one can run it directly on its sketch $S_G$, M($S_G$), to get an approximate result, without modifying the method M.
 
 \begin{figure}[H]
 \centering
@@ -339,7 +345,7 @@ When an edge query is given, which can be denoted as $f_e(a,b)$ where a and b ar
 
 \begin{enumerate}
 \item First  estimate edge weight $M_i[h(a)][h(b)] $ where $M_i[h(a)][h(b)]$ is the cell value relative to position h(a) and h(b) in adjacency matrix $M_i$ and h is the hash function.
-\item Then uses a corresponding function $\Gamma()$ to merge them values from each matrix $M_i$.
+\item Then uses a corresponding function $\Gamma()$ to merge the values from each matrix $M_i$.
 \end{enumerate}
  
 We can denote it as follows, 
@@ -351,7 +357,7 @@ We can denote it as follows,
 You can see that estimating the aggregate weight of an edge query is in O(n) time, where n is a constant.
 
 
-\chapter{Query platform }
+\chapter{Preliminaries of querying for streaming graphs}
 
 
 \section{Graph analysis frameworks}
@@ -424,6 +430,7 @@ TCM introduces a sketching technique which can be used to all types of graph ana
 
 We then implemented TCM sketching as a standalone Java application. More information on implementation could be found under next chapter.
 
+\chapter{Querying for streaming graphs}
 \section{Evaluating TCM}
 
 We then wrote a web crawler which crawls the world wide web and create a graph stream about web pages and their links to other web pages. This graph stream used to continue with our testing on TCM. 
@@ -626,7 +633,7 @@ We see that while we are persisting the sketches, we get new edge insertions as 
 In the same way, we implemented a restore functionality where we can load the sketched persisted in any of the above methods into the memory and then continue building those sketches thereafter.
 
 \chapter{Results and Evaluation}
-In this chapter, evaluation of the proposed model, the results and the important parts of the implementation are discussed. Java wa chosen as the implementation language as of the vast set of tools available and abundance community and references.
+In this chapter, evaluation of the proposed model, the results and the important parts of the implementation are discussed. Java was chosen as the implementation language as of the vast set of tools available and abundance community and references.
 
 \section{High level architecture}
 
@@ -636,30 +643,30 @@ In this chapter, evaluation of the proposed model, the results and the important
 \caption{High level architecture}
 \end{figure}
 
-\subsection{Graph stream interface}
+\subsection*{Graph stream interface}
 The users should be able to plug a stream of data to the systems, then a mapper which maps data into edges and vertices and input to the graph model as a graph stream.
 
-\subsection{Graph model}
+\subsection*{Graph model}
 Graph model is how the graph represented in the memory and in this proposed system graph sketches are used for this. 
 
-\subsection{Graph sketching}
+\subsection*{Graph sketching}
 There are many sketching techniques, some techniques limits the model for specific types of queries. This research used TCM sketching model as the sketching technique as it is a general purpose sketching technique.
 
-\subsubsection{Sketch creation}
+\subsubsection*{Sketch creation}
 As the graph build over the time, new sketches are created according to the used sketch creation policy in order to preserve the accuracy at a reasonable level.  
 
-\subsubsection{Sketch deletion}
+\subsubsection*{Sketch deletion}
 As new sketches with higher sizes are created,  the small sketches are removed when their contribution to the accuracy decrease.
 
-\subsection{Persistence interface}
+\subsection*{Persistence interface}
 The interface where the sketches could be back-upped and restored.
 
-\section{Abstract Class Diagramm}
+\section{Abstract Class Diagram}
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.8]{images/image06}
-\caption{Abstract Class Diagramm}
+\caption{Abstract Class Diagram}
 \end{figure}
 
 \section{Graph summaries}
@@ -736,7 +743,7 @@ While creating the above graph, three sketches were created, but with very small
 \caption{A sketch of size 112}
 \end{figure}
 
-Next move was to use the sketches and query the graph. TCM paper has defined 4 types of queries and evaluated with several experiments. Node queries were chosen to start with as interesting queries like identifying top-k heavy hitters\cite{HeavyHitters}, conditional heavy hitters\cite{TCM}, etc could be used at later point, which are also node queries. 
+Next move was to use the sketches and query the graph. TCM paper has defined 4 types of queries and evaluated with several experiments. Node queries were chosen to start with as interesting queries like identifying top-k heavy hitters\cite{HeavyHitters}, conditional heavy hitters\cite{TCM}, etc are based on node queries, and then the edge queries are also evaluated.
 
 \paragraph{}
 
@@ -752,7 +759,7 @@ Following is a degree distribution plot of a graph with 100 nodes and 1000 edges
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{images/dd1}
+\includegraphics[scale=0.6]{images/dd1}
 \caption{Degree distribution from sketches of sizes 73, 79, 83, 89}
 \end{figure}
 
@@ -764,13 +771,13 @@ Next two graphs are the same as above but with sketches  of sizes 89, 97 and 83,
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{images/dd2}
+\includegraphics[scale=0.6]{images/dd2}
 \caption{Degree distribution from sketches of sizes 89, 97}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{images/dd3}
+\includegraphics[scale=0.6]{images/dd3}
 \caption{Degree distribution from sketches of sizes 83, 89, 97}
 \end{figure}
 
@@ -785,8 +792,8 @@ Following is a plot of degree distribution of a natural graph, which was generat
 
 All the above experiments involved a series of node queries in each experiment and the results looked promising when visually compared. At this point, defining measures to evaluate the accuracy of the queries was needed. 
 
-\section{Evaluation Matrices}
-Number of queries running on the sketches giving the exact correct results as running on the original graph could be calculated easily, however, as the research is interested not only in exact correct results, but also in approximate results, this could niot be used as a good measurement. Thus, better matrices were needed.
+\section{Evaluation Metrics}
+Number of queries running on the sketches giving the exact correct results as running on the original graph could be calculated easily, however, as the research is interested not only in exact correct results, but also in approximate results, this could not be used as a good measurement. Thus, better metrics were needed.
 
 \paragraph{}
 
@@ -826,9 +833,9 @@ g(Q) =  \frac{\left | \{\,q\, |   \left |\tilde{f}'(q) - f(q)\right | \leq G_0, 
 
 \paragraph{}
  
-Then these matrices were used in the next set of experiments to measure the accuracy of the sketching. The same experiment as the previous ones was performed but with more nodes, edges and queries. This is because the matrices takes averages, and for averages to be unbiased, more trials were needed, which means more queries were needed.
+Then these metrics were used in the next set of experiments to measure the accuracy of the sketching. The same experiment as the previous ones was performed but with more nodes, edges and queries. This is because the metrics takes averages, and for averages to be unbiased, more trials were needed, which means more queries were needed.
 
-\section{Evaluating with defined matrices}
+\section{Evaluating with defined metrics}
 
 This experiment was performed with 1000 nodes and 10,000 edges graph, and then running 1000 node queries on the graph.
 
@@ -838,7 +845,7 @@ This experiment was performed with 1000 nodes and 10,000 edges graph, and then r
 \caption[1000 nodes 10,000 edges with sketches of sizes 810, 820, 827, 830]{Degree distribution calculated on a graph with 1000 nodes 10,000 edges using set of sketches of sizes 810, 820, 827, 830}
 \end{figure}
 
-Then the matrices were calculated, which are Average Relative Error(ARE), Percentages of Effective Queries when $G_0$ is 0 (which is the number of queries giving the exact results), $G_0$ is 1, $G_0$ is 2 and $G_0$ is 3.
+Then the metrics were calculated, which are Average Relative Error(ARE), Percentages of Effective Queries when $G_0$ is 0 (which is the number of queries giving the exact results), $G_0$ is 1, $G_0$ is 2 and $G_0$ is 3.
 
 \paragraph{}
 
@@ -849,8 +856,8 @@ Then the matrices were calculated, which are Average Relative Error(ARE), Percen
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 \\ \hline
 163.86 &   82.6  &   82.8  &   82.8  &   83.5  \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching}
-\label{table:accuracy-matrices-for-sketching}
+\caption{Accuracy metrics for sketching}
+\label{table:accuracy-metrics-for-sketching}
 \end{table}
 
 
@@ -879,7 +886,7 @@ Here the automatic sketch creation was firstly run and then the number of sketch
 \caption{With automatic sketch creation, 1000 nodes, 10000 edges}
 \end{figure}
 
-The results were satisfying when the two plots were visually compared and the next step was to do the same experiment with our defined accuracy matrices. 
+The results were satisfying when the two plots were visually compared and the next step was to do the same experiment with our defined accuracy metrics. 
 
 \paragraph{}
 
@@ -891,7 +898,7 @@ In this experiment it was a graph with 1000 nodes and 10,000 edges was used with
 \caption{1000 nodes and 10,000 edges was used with 'only two sketch gives correct value' policy}
 \end{figure}
 
-The accuracy matrices were as follows, 
+The accuracy metrics were as follows, 
 
 \begin{table}[H]
 \centering
@@ -900,7 +907,7 @@ The accuracy matrices were as follows,
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 &  $G_0$=3 & $G_0$=4 \\ \hline
 200.80 &   58.5  &  65.8   &   73.3  &   79.8   &   81.8 \\ \hline
 \end{tabular}
-\caption{Accuracy matrices with automatic sketch creation}
+\caption{Accuracy metrics with automatic sketch creation}
 \end{table}
 
 Then the next experiment was done using the same number of sketches with same sizes, but without automatic creation, that is creating at the beginning. This way, we can benchmark the results of the automatic sketch creation with the results of the TCM with respect to accuracy measures. 
@@ -911,7 +918,7 @@ Then the next experiment was done using the same number of sketches with same si
 \caption{1000 nodes, 10000 edges graph using sketches of sizes 810, 820, 823, 827, 830, without auto sketch creation}
 \end{figure}
 
-The accuracy matrices were as follows,
+The accuracy metrics were as follows,
 
 \begin{table}[H]
 \centering
@@ -920,7 +927,7 @@ The accuracy matrices were as follows,
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 & $G_0$=4\\ \hline
 172.74 &   80.9  &   81.1  &   81.9  &   82.3  & 83.3   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching without auto sketch creation}
+\caption{Accuracy metrics for sketching without auto sketch creation}
 \end{table}
 
 The resulted Average Relative Error from the experiment which used automatic sketch creation, which is 200.80 was reasonable when compared to Average Relative Error  of the experiment which did not used the automatic sketch creation. 
@@ -973,7 +980,7 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 299.03 &   40.1  &   48.6  &   57.6  \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching using 'only one sketch gives correct value'}
+\caption{Accuracy metrics for sketching using 'only one sketch gives correct value'}
 \end{table}
 
 \subsubsection{Only two sketch gives correct value}
@@ -985,7 +992,7 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 200.71 &   57.5  &   66.8  &   77.7  \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching using 'only two sketch gives correct value'}
+\caption{Accuracy metrics for sketching using 'only two sketch gives correct value'}
 \end{table}
 
 \subsubsection{Only two sketch gives correct value, 1 tolerance}
@@ -997,7 +1004,7 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 406.10 &   62.7  &   62.7  &     \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching using 'only two sketch gives correct value' and 1 tolerance}
+\caption{Accuracy metrics for sketching using 'only two sketch gives correct value' and 1 tolerance}
 \end{table}
 
 As node queries were analysed to a greater extent, next move was to analyse how the system works for other types of queries. For the next analyses, edge queries were chosen.
@@ -1015,10 +1022,10 @@ First experiment was done using 1000 nodes and 10000 edges and using sketches 14
 $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 97.74  &   99.99  &   100.0\\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries}
+\caption{Accuracy metrics for sketching with edge queries}
 \end{table}
 
-These results shows us the edge queries can produce quite accurate results using mush smaller sketches when compared to node queries. Then a series of experiment was performed with different edge sizes and the accuracy matrices were measured. Following are the some of the results.  
+These results shows us the edge queries can produce quite accurate results using mush smaller sketches when compared to node queries. Then a series of experiment was performed with different edge sizes and the accuracy metrics were measured. Following are the some of the results.  
 
 \begin{table}[H]
 \centering
@@ -1029,7 +1036,7 @@ n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 1000 & 10000 & 93.38   & 99.90   & 100.00  \\ \hline
 1000 & 20000 & 66.25   & 95.57   & 99.77   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries on series of experiments}
+\caption{Accuracy metrics for sketching with edge queries on series of experiments}
 \end{table}
 
 \subsection{Confusion matrix for edge queries}
@@ -1071,7 +1078,7 @@ Again the sketches could identify 94.6\% of the non-existing edges accurately.
 
 \subsection{Auto sketch creation with Edge Queries}
 
-Now the automatic sketch creation was evaluated on edge queries with the accuracy matrices. The experiment used a graph of 1000 nodes and 10000 edges. Initial sketches were of sizes 73 and 79. 'only two sketch gives correct value' policy was used with 0 tolerance. The auto sketch creation mechanism had created 10 more sketches with sizes 83, 89, 111, 127, 137, 142, 157, 177, 191, 219.
+Now the automatic sketch creation was evaluated on edge queries with the accuracy metrics. The experiment used a graph of 1000 nodes and 10000 edges. Initial sketches were of sizes 73 and 79. 'only two sketch gives correct value' policy was used with 0 tolerance. The auto sketch creation mechanism had created 10 more sketches with sizes 83, 89, 111, 127, 137, 142, 157, 177, 191, 219.
 
 \begin{table}[H]
 \centering
@@ -1080,7 +1087,7 @@ Now the automatic sketch creation was evaluated on edge queries with the accurac
 $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 99.23  &   100.0  &   100.0\\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries using auto sketch creation}
+\caption{Accuracy metrics for sketching with edge queries using auto sketch creation}
 \end{table}
 
 Then the same experiment was carried out using the same number of sketches and same sketch sizes, but without automatic sketch creation, that is creating all the sketches at the beginning. The results were as follows.
@@ -1092,7 +1099,7 @@ Then the same experiment was carried out using the same number of sketches and s
 $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 99.98  &   100.0  &   100.0\\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries without using auto sketch creation}
+\caption{Accuracy metrics for sketching with edge queries without using auto sketch creation}
 \end{table}
 
 \paragraph{}
@@ -1108,7 +1115,7 @@ In this experiment, 'only two sketch gives correct value' policy was used with 2
 n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 1000 & 10,000 & 99.90   & 99.99   & 100.00   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries on series of experiments}
+\caption{Accuracy metrics for sketching with edge queries on series of experiments}
 \end{table}
 
 In the next experiment, 'only two sketch gives correct value' policy was used with 2 tolerance, the auto sketch creation mechanism created 5 more sketches with sizes 555, 877, 999, 1005, 1560.  
@@ -1120,7 +1127,7 @@ In the next experiment, 'only two sketch gives correct value' policy was used wi
 n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 1000 & 100,000 & 99.83   & 99.91   & 100.00   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for sketching with edge queries on series of experiments}
+\caption{Accuracy metrics for sketching with edge queries on series of experiments}
 \end{table}
 
 The results shows us the automatic sketch creation also gives better results for edge queries.
@@ -1138,7 +1145,7 @@ Other than the edge insertion, a graph stream might have edge deletions in some 
 1\% & 97.78   & 99.98   & 100.00   \\ \hline
 10\% & 98.36   & 99.98   & 100.00   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices with edge queries when the graph has edge deletions}
+\caption{Accuracy metrics with edge queries when the graph has edge deletions}
 \end{table}
 
 \section{Contribution of queries for accuracy in ASC}
@@ -1151,7 +1158,7 @@ However, the problem with node queries are, only one node is given. For example,
 
 \paragraph{}
 
-One problem with the previously done node query experiment was, this inability of node queries to contribute toward accuracy was not considered. Only the edge insertion has contributed to the accuracy in those experiments. Then a series of experiments was done performing a mix of edge queries and node queries and the accuracy matrices were measured.
+One problem with the previously done node query experiment was, this inability of node queries to contribute toward accuracy was not considered. Only the edge insertion has contributed to the accuracy in those experiments. Then a series of experiments was done performing a mix of edge queries and node queries and the accuracy metrics were measured.
 
 \paragraph{}
 
@@ -1169,13 +1176,57 @@ Experiments used 1000 nodes and 10,000 graph and performed 1000 node queries. Th
 10\% & 0.187 & 66.2   & 77.4   & 80.1   \\ \hline
 20\% & 0.173 & 80.2   & 80.9   & 80.9   \\ \hline
 \end{tabular}
-\caption{Accuracy matrices for automatic sketch creation  with edge queries and node queries on series of experiments}
+\caption{Accuracy metrics for automatic sketch creation  with edge queries and node queries on series of experiments}
 \end{table}
+
 
 The experiments showed a rise in accuracy of node queries when edge queries are performed with node queries. Only 58.5\% of the node queries gave exact accurate results when no edge queries are performed, and with 20\% of edge queries, the accuracy reached to 80.2\%.
 
+\section{Evaluation on Natural graphs}
+
+As being able to work with natural graphs is one objective of the research, final experiments were  about evaluating the model with natural graphs. 
+
+\paragraph{}
+
+First 2 experiments used 4 sketches with sizes 810, 820, 827, 830 and the accuracy metrics were calculated for node queries. The degree distribution was also plotted performing series of node queries the same way as previous node query experiments.
+
+\paragraph{}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+1000 & 3166  & 89.8   & 95.9  & 97.9  \\ \hline
+1500 & 7887 & 72.33   & 84.33   & 90.80  \\ \hline
+\end{tabular}
+\caption{Accuracy metrics for sketching with node queries on natural graphs}
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/GenForestFire-1000-035-035-n1500-e7887-sketches-810-820-827-830plot}
+\end{figure}
+
+Then the automatic sketch creation is evaluated using natural graph, starting with two initial sketches of sizes 810, 820. The automatic sketch creation mechanism then created 4 more sketches with sizes 827, 830, 870, 890.
+
+\paragraph{}
+ 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+1000 & 4164  & 76.0   & 82.9  & 87.4  \\ \hline
+\end{tabular}
+\caption{Accuracy metrics for sketching with node queries on natural graphs when using automatic sketch creation}
+\end{table}
+
+These results shows the model is capable of working with natural graphs also, both when using automatic sketch creation and without using automatic sketch creation.
+
 \section{Memory usage}
-Table \ref{table:accuracy-matrices-for-sketching} shows the accuracy measures when using sketches on a 1000 nodes and 10000 edges graph. Within $\pm3$ range approximation, that is when $G_0$ is 3, there were $83.5\%$ queries giving correct results. When achieving this accuracy, the experiment used 4 sketches of sizes 810, 820, 827, 830. If we consider one cell of the adjacency matrix used one unit of memory, the the total memory used for all the 4 sketches would be, $810^2+820^2+827^2+830^2 = 2,701,329$. But if the number of nodes of the graph is knows before hand, one could create an adjacency matrix of size 1000 and that would take only $1000^2 = 1,000,000$ memory units. With sketches, the model has used approximately  2.7 times memory. 
+Table \ref{table:accuracy-metrics-for-sketching} shows the accuracy measures when using sketches on a 1000 nodes and 10000 edges graph. Within $\pm3$ range approximation, that is when $G_0$ is 3, there were $83.5\%$ queries giving correct results. When achieving this accuracy, the experiment used 4 sketches of sizes 810, 820, 827, 830. If we consider one cell of the adjacency matrix used one unit of memory, the the total memory used for all the 4 sketches would be, $810^2+820^2+827^2+830^2 = 2,701,329$. But if the number of nodes of the graph is knows before hand, one could create an adjacency matrix of size 1000 and that would take only $1000^2 = 1,000,000$ memory units. With sketches, the model has used approximately  2.7 times memory. 
 
 \paragraph{}
 
@@ -1190,7 +1241,11 @@ One other thing is, all these sketches need not to be stored on one computation 
 
 \section{Conclusion}
 
-In our study we evaluated different techniques one could use to build a graph analysis model and looking at the strengths and weaknesses of these techniques we concluded on what techniques we should continue on and what how to solve the problems of the selected techniques. We moved from graph partitioning to one pass algorithms and then to graph summarising techniques. With graph summarising techniques we considered spanner, sparsifiers and sketchers. We continued with sketchers and identified TCM as a good sketching model. Then we implemented our model using TCM sketching and evaluated  the model with different scenarios and measures. We performed node queries and edge queries with different sketching setting and evaluated the accuracy using the Average Relative Error and Number of Effective Queries as accuracy  measurement. We also evaluated if the queries we consider as Effective are really effective. The results were upto a reasonable satisfactory level. One problem with TCM sketching was, how it suggests to create the sketches is to use the full available  memory in order to create sketches as large as possible. out of curiosity, we questioned can't we extend the TCM to create the sketches dynamically as the graph grows. Two problems we had to solve for this was, when to create a new sketch and how. We introduced a heuristic based technique which looks at the sketch values and decide if a new sketch should be created and a techniques to create new sketches from existing sketches. Then we evaluated them the same way.
+In our study we evaluated different techniques one could use to build a graph analysis model and looking at the strengths and weaknesses of these techniques we concluded on what techniques we should continue on and  how to solve the problems of the selected techniques. We moved from graph partitioning to one pass algorithms and then to graph summarising techniques. With graph summarising techniques we considered spanner, sparsifiers and sketchers. We continued with sketchers and identified TCM as a good sketching model. Then we implemented our model using TCM sketching and evaluated  the model with different scenarios and measures. We performed node queries and edge queries with different sketching setting and evaluated the accuracy using the Average Relative Error and Number of Effective Queries as accuracy  measurement. We also evaluated if the queries we consider as Effective are really effective. Then we evaluated the confusion matrix for the queries. The results were upto a reasonable satisfactory level. 
+
+\paragraph{}
+
+One problem with TCM sketching was, how it suggests to create the sketches is, to use the full available  memory in order to create sketches as large as possible. We questioned can't we extend the TCM to create the sketches dynamically as the graph grows? Two problems we had to solve for this was, when to create a new sketch and how. We introduced a heuristic based technique which looks at the sketch values and decide if a new sketch should be created and a techniques to create new sketches from existing sketches. Then we evaluated them the same way. Then we discussed and evaluated how the contribution of different queries towards the accuracy of the automatic sketch creation. The system was evaluated with natural graphs and dynamic graphs for accuracy and the accuracy of the automatic sketch creation mechanism was evaluated when working with natural graphs.
 
 \paragraph{}
 
@@ -1199,6 +1254,9 @@ In both settings, that is, with and without automatic sketch creation, edge quer
 \section{Future Work}
 
 The automatic sketch creation mechanism should be improved with identifying better heuristics for deciding when to created a new sketch. And also should identify if any better mechanisms for creating  and  updating  new sketches exists.  
+
+\paragraph{}
+This is an embarrassingly parallel query framework model, therefore the model should be evaluated on top of a parallel framework. And also, new metrics has to be defined for thorough evaluation
 
 \newpage
 \begin{appendices}
@@ -1219,6 +1277,7 @@ The automatic sketch creation mechanism should be improved with identifying bett
 \begin{thebibliography}{1}
 
   \bibitem{PageRank} Page, L., Brin, S., Motwani, R.,  Winograd, T. (1998). The PageRank Citation Ranking: Bringing Order to the Web. World Wide Web Internet And Web Information Systems, 54(1999-66), 1–17. http://doi.org/10.1.1.31.1768
+  \bibitem{Horawalavithana} Horawalavithana, Y. S. (2015). Cloud based publish / subscribe model for Top-k matching over continuous data streams. Undergraduate Thesis, University of Colombo
   \bibitem{TwitterStats} "Twitter: Number Of Active Users 2010-2016 | Statista". Statista. N.p., 2016. Web. 30 Dec. 2016.
   \bibitem{Facebook} Ching, A., Edunov, S., Kabiljo, M., Logothetis, D.,  Muthukrishnan, S. (2015). One Trillion Edges : Graph Processing at Facebook-Scale. Vldb, 8(12), 1804–1815. http://doi.org/10.14778/2824032.2824077
   \bibitem{WebGraphs} S. Raghavan and H. Garcia-Molina. Representing web graphs. In ICDE, pages 405–416, Atlanta, GA, USA, 2003.
