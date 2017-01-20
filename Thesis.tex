@@ -44,7 +44,7 @@
 \Large Milindu Sanoj Kumarage\\
 \Large Index No: 12000752\\[1cm]
 \Large Supervisor: Dr.D.N. Ranasinghe\\[1cm]
-\Large December 2016\\[1.5cm]
+\Large January 2017\\[1.5cm]
 \large Submitted in partial fulfillment of the requirements of the B. Sc in Computer Science 4th year individual project\\[0.5cm] 
 \includegraphics[scale=0.06]{ucsc}
 \vfill % Fill the rest of the page with whitespace
@@ -56,15 +56,28 @@
 
 I certify that this dissertation does not incorporate, without acknowledgement, any material previously submitted for a degree or diploma in any university and to the best of my knowledge and belief, it does not contain any material previously published or written by another person or myself except where due reference is made in the text. I also hereby give consent for my dissertation, if accepted, be made available for photocopying and for interlibrary loans, and for the title and abstract to be made available to outside organizations.
 
+\paragraph{}
+\paragraph{}
+\noindent
+\begin{tabular}{ll}
+			Signature : \makebox[2.5in]{\hrulefill} \\
+			Name\quad\quad      : M.S. Kumarage \\
+			Date\quad\quad\:\;: January 3, 2017\\		
+\end{tabular}
 
+\paragraph{}
+\paragraph{}
 
-I, Dr. D.N. Ranasinghe, certify that I supervised this thesis entitled ”An efficient query platform for streaming and dynamic natural graphs” is conducted by M.S.Kumar I recommend this thesis to the University of Colombo School of Computing in partial fulfilment of the requirement of the degree of Bachelor of Science (Computer Science).
+I, Dr. D.N. Ranasinghe, certify that I supervised this thesis entitled ”An efficient query platform for streaming and dynamic natural graphs” is conducted by M.S.Kumarage,  I recommend this thesis to the University of Colombo School of Computing in partial fulfilment of the requirement of the degree of Bachelor of Science (Computer Science).
 
-\newpage
-
-\section*{Acknowledgements}
-\addcontentsline{toc}{section}{Acknowledgements}%
-To my parents
+\paragraph{}
+\paragraph{}
+\noindent
+\begin{tabular}{ll}
+			Signature : \makebox[2.5in]{\hrulefill} \\
+			Name\quad\quad      : Dr. D.N.Ranasinghe \\
+			Date\quad\quad\:\;: January 3, 2017\\		
+\end{tabular}
 \newpage
 
 
@@ -81,8 +94,38 @@ We identified graph summarization as a good technique for such a query platform 
 
 Then the research propose extensions to the TCM model for automatic sketch creation while the graph is building and evaluate the success when using different sketch creation policies. Then we evaluate the contribution of different queries on the accuracy of the automatic sketch creation. Finally we discuss the memory usage and efficiency of the model. 
 
-\textbf{Keywords:} Streaming, graph,  
+We could show the proposed model could work well with streaming graphs, even when the case of natural graphs, and produce 80\% to 90\% present effective queries which had $ \pm3$ deviation from exact correct results. We could show the effectiveness of the effective queries are also as expected.\\
+  
 
+\textbf{Keywords:} Streaming, graph, analytic, natural graphs 
+
+\newpage
+
+\section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}%
+
+I would like to give special thanks to,
+
+\begin{center}
+
+ \emph{Dr. D.N. Ranasinghe}, Senior Lecturer at UCSC\\
+ who offered his guidance with invaluable advices throughout the research, being an always helpful supervisor.
+ 
+\paragraph{}
+
+\emph{Sameera Horawalavithana}, PHD Fellow at University of South Florida\\
+for all the help, motivation and advises given \\
+
+\paragraph{}
+
+\emph{Charitha Madusanka}, at WASN research lab, Sri Lanka\\
+ for the support and encouragement given.
+ 
+\paragraph{}
+\emph{My loving mother and father}\\
+for being my strength and courage
+
+\end{center}
 \newpage
 
 \listoffigures
@@ -156,7 +199,7 @@ The problem is to find an optimal model for a query platform, a graph framework 
 This research aims to introduce a model for streaming graph analysis, but does not consider other aspects like security, accessibility which  a production ready sophisticated framework should have.
 
 \section{Thesis outline}
-The thesis is organized as follows. First half of the Chapter 2 briefly describes the related areas and terms then the later half describes the related work and how our approach is distinct with them. Chapter 3 discusses our approach on building the model, which paths we took, what and how we evaluated, why we choose to pivot or continue on the considered path. This chapter has our proposed extension to the TCM model. Chapter 4 discusses on the experiments we conducted, implementation details of the experiments, results we got and our conclusions on the experiments. Chapter 5 includes our conclusions in the overall and the possible improvements we see which should be evaluated in the future.
+The thesis is organized as follows. First half of the Chapter 2 briefly describes the related areas and terms then the later half describes the related work and how our approach is distinct with them. Chapter 3 discusses the preliminaries of research, Chapter 4 discuses our approach on building the model, which paths we took, what and how we evaluated, why we choose to pivot or continue on the considered path. This chapter has our proposed extension to the TCM model. Chapter 5 discusses on the experiments we conducted, implementation details of the experiments, results we got and our conclusions on the experiments. Chapter 6 includes our conclusions in the overall and the possible improvements we see which should be evaluated in the future.
 
 \chapter{Background}
 \section{Graphs in Real-world}
@@ -633,7 +676,7 @@ We see that while we are persisting the sketches, we get new edge insertions as 
 In the same way, we implemented a restore functionality where we can load the sketched persisted in any of the above methods into the memory and then continue building those sketches thereafter.
 
 \chapter{Results and Evaluation}
-In this chapter, evaluation of the proposed model, the results and the important parts of the implementation are discussed. Java was chosen as the implementation language as of the vast set of tools available and abundance community and references.
+In this chapter, evaluation of the proposed model, the results and the important parts of the implementation are discussed. The chapter firstly describe the implementation details very briefly, with high level architecture of the model, class diagram, etc, then starts discussing the results, defining the evaluation metrics. Java was chosen as the implementation language as of the vast set of tools available and abundance community and references. The experiments was performed on a Intel i5 1.6Ghz machine with 8GB of RAM, running Ubuntu 14.4.
 
 \section{High level architecture}
 
@@ -660,14 +703,6 @@ As new sketches with higher sizes are created,  the small sketches are removed w
 
 \subsection*{Persistence interface}
 The interface where the sketches could be back-upped and restored.
-
-\section{Abstract Class Diagram}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{images/image06}
-\caption{Abstract Class Diagram}
-\end{figure}
 
 \section{Graph summaries}
 When implementing the adjacency matrices of the sketches, a Java 2D arrays was used, as the array sizes are known  beforehand and the operations which are performed on them are only setting and getting array values by giving the array indexes and this operations takes constant time on array data structures.
@@ -709,7 +744,7 @@ It took us about half an hours to build this graph because crawling the web and 
 
 \paragraph{}
 
-Following is a also as above graph, but a zoomed out view and with many more nodes. The red dots you see are actually groups of nodes connected together. Edges has been removed for clarity but you can get an idea about the connectivity of nodes by the closeness of the nodes. You can see there are some nodes which has very high connectivity, thus forming big groups, as the one in the top left corner. 
+Following is same as above graph, but a zoomed out view and with many more nodes. The red dots you see are actually groups of nodes connected together. Edges has been removed for clarity but you can get an idea about the connectivity of nodes by the closeness of the nodes. You can see there are some nodes which has very high connectivity, thus forming big groups, like the one in the top left corner. 
 
 \begin{figure}[H]
 \centering
@@ -755,19 +790,19 @@ The most simplest node query is to ask the degree of a node giving a node id. Wh
 
 \paragraph{}
 
-Following is a degree distribution plot of a graph with 100 nodes and 1000 edges. The dotted line indicate the correct degree distribution which is calculated from the original graph, while the line indicates the degree distribution calculated by querying the TCM sketches. Here have used sketches of sizes 73, 79, 83, 89. You can see, there is a slight deviation between the two graphs but the original shape is preserved. 
+Following is a degree distribution plot of a graph with 100 nodes and 1000 edges. The dotted line indicate the correct degree distribution which is calculated from the original graph, while the line indicates the degree distribution calculated by querying the TCM sketches. Here have used sketches of sizes 75, 80, 83, 89. You can see, there is a slight deviation between the two graphs but the original shape is preserved. 
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{images/dd1}
-\caption{Degree distribution from sketches of sizes 73, 79, 83, 89}
+\caption{Degree distribution from sketches of sizes 75, 80, 83, 89}
 \end{figure}
 
 You can see a drop in the low degrees and a rise in the high degrees. This happens because of the small sketches having nodes which maps too many nodes of the original graph onto them, thus increasing the adjacency matrix’s corresponding cell value. When there are such nodes in the sketch, all the nodes of the original graph which maps to those nodes gives a higher values than they have. 
 
 \paragraph{}
 
-Next two graphs are the same as above but with sketches  of sizes 89, 97 and 83, 89, 97 respectively. You can see how the degree distribution plot drawn from the TCM sketches has become more closer to the degree distribution plot drawn from the original graph. The bigger size of the sketches has contributed to more accurate results comparing previous plot and next two plots. By comparing the next two plots you can see how more number of sketches has contributed to more accurate results.
+Next two graphs are the same as above but with sketches  of sizes 89, 97 and 85, 89, 97 respectively. You can see how the degree distribution plot drawn from the TCM sketches has become more closer to the degree distribution plot drawn from the original graph. The bigger size of the sketches has contributed to more accurate results comparing previous plot and next two plots. By comparing the next two plots you can see how more number of sketches has contributed to more accurate results.
 
 \begin{figure}[H]
 \centering
@@ -778,16 +813,16 @@ Next two graphs are the same as above but with sketches  of sizes 89, 97 and 83,
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{images/dd3}
-\caption{Degree distribution from sketches of sizes 83, 89, 97}
+\caption{Degree distribution from sketches of sizes 85, 89, 97}
 \end{figure}
 
 \section{TCM Sketching for Natural graph}
-Following is a plot of degree distribution of a natural graph, which was generated from our web crawler. The experiment time to time plotted the degree distribution of the graph by querying the sketches and from the original graph. The blue line indicate the correct degree distribution which is calculated from the original graph, while the red line indicates the degree distribution calculated by querying the TCM sketches. Here we have used sketches on sizes 11 19 71. You can see, there is a slight deviation between the two graphs but the original shape is preserved.
+Following is a plot of degree distribution of a natural graph, which was generated from our web crawler. The experiment time to time plotted the degree distribution of the graph by querying the sketches and from the original graph. The blue line indicate the correct degree distribution which is calculated from the original graph, while the red line indicates the degree distribution calculated by querying the TCM sketches. Here we have used sketches on sizes 10, 20, 70. You can see, there is a slight deviation between the two graphs but the original shape is preserved.
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.3]{images/ddn}
-\caption{Degree distribution of a streaming natural graph from sketches of sizes 11, 19, 71}
+\caption{Degree distribution of a streaming natural graph from sketches of sizes 10, 20, 70}
 \end{figure}
 
 All the above experiments involved a series of node queries in each experiment and the results looked promising when visually compared. At this point, defining measures to evaluate the accuracy of the queries was needed. 
@@ -854,7 +889,7 @@ Then the metrics were calculated, which are Average Relative Error(ARE), Percent
 \begin{tabular}{|l|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 \\ \hline
-163.86 &   82.6  &   82.8  &   82.8  &   83.5  \\ \hline
+0.163 &   82.6  &   82.8  &   82.8  &   83.5  \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching}
 \label{table:accuracy-metrics-for-sketching}
@@ -905,7 +940,7 @@ The accuracy metrics were as follows,
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 &  $G_0$=3 & $G_0$=4 \\ \hline
-200.80 &   58.5  &  65.8   &   73.3  &   79.8   &   81.8 \\ \hline
+0.200 &   58.5  &  65.8   &   73.3  &   79.8   &   81.8 \\ \hline
 \end{tabular}
 \caption{Accuracy metrics with automatic sketch creation}
 \end{table}
@@ -925,12 +960,12 @@ The accuracy metrics were as follows,
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 & $G_0$=3 & $G_0$=4\\ \hline
-172.74 &   80.9  &   81.1  &   81.9  &   82.3  & 83.3   \\ \hline
+0.172 &   80.9  &   81.1  &   81.9  &   82.3  & 83.3   \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching without auto sketch creation}
 \end{table}
 
-The resulted Average Relative Error from the experiment which used automatic sketch creation, which is 200.80 was reasonable when compared to Average Relative Error  of the experiment which did not used the automatic sketch creation. 
+The resulted Average Relative Error from the experiment which used automatic sketch creation, which is 0.200 was reasonable when compared to Average Relative Error  of the experiment which did not used the automatic sketch creation. 
 
 \paragraph{}
 
@@ -969,7 +1004,7 @@ This shows us the queries which were considered as effective are how effective. 
 
 \subsection{Evaluating different creating policies}
 
-Different automatic sketch creation policies were then evaluated using a 1000 nodes and  10000 edges graph on sketches of sizes 811, 821, 823, 827, 829 starting with 3 initial sketches.
+Different automatic sketch creation policies were then evaluated using a 1000 nodes and  10000 edges graph on sketches of sizes 810, 8210, 823, 827, 830 starting with 3 initial sketches. Following are the some important results. 
 
 \subsubsection{Only one sketch gives correct value}
 
@@ -978,7 +1013,7 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
 \begin{tabular}{|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
-299.03 &   40.1  &   48.6  &   57.6  \\ \hline
+0.299 &   40.1  &   48.6  &   57.6  \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching using 'only one sketch gives correct value'}
 \end{table}
@@ -990,7 +1025,7 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
 \begin{tabular}{|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
-200.71 &   57.5  &   66.8  &   77.7  \\ \hline
+0.200 &   57.5  &   66.8  &   77.7  \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching using 'only two sketch gives correct value'}
 \end{table}
@@ -1002,10 +1037,12 @@ Different automatic sketch creation policies were then evaluated using a 1000 no
 \begin{tabular}{|l|l|l|l|}
 \hline
  ARE   & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
-406.10 &   62.7  &   62.7  &     \\ \hline
+0.406 &   62.7  &   62.7  & 63.1    \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching using 'only two sketch gives correct value' and 1 tolerance}
 \end{table}
+
+'Only two sketch gives correct value' with 0 or 1 tolerance gave better results in most of the experiments. On the 'only two sketch gives correct value' with 1 tolerance results above, the ARE is a bit higher than with 0 tolerance, the reason was there were several queries outside the  $G_0$=2 range which gave a bit higher deviated values.
 
 As node queries were analysed to a greater extent, next move was to analyse how the system works for other types of queries. For the next analyses, edge queries were chosen.
 
@@ -1078,7 +1115,7 @@ Again the sketches could identify 94.6\% of the non-existing edges accurately.
 
 \subsection{Auto sketch creation with Edge Queries}
 
-Now the automatic sketch creation was evaluated on edge queries with the accuracy metrics. The experiment used a graph of 1000 nodes and 10000 edges. Initial sketches were of sizes 73 and 79. 'only two sketch gives correct value' policy was used with 0 tolerance. The auto sketch creation mechanism had created 10 more sketches with sizes 83, 89, 111, 127, 137, 142, 157, 177, 191, 219.
+Now the automatic sketch creation was evaluated on edge queries with the accuracy metrics. The experiment used a graph of 1000 nodes and 10000 edges. Initial sketches were of sizes 73 and 79. 'only two sketch gives correct value' policy was used with 0 tolerance. The auto sketch creation mechanism had created 10 more sketches with sizes 85, 89, 111, 127, 135, 142, 157, 177, 190, 220.
 
 \begin{table}[H]
 \centering
@@ -1221,6 +1258,18 @@ n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
 1000 & 4164  & 76.0   & 82.9  & 87.4  \\ \hline
 \end{tabular}
 \caption{Accuracy metrics for sketching with node queries on natural graphs when using automatic sketch creation}
+\end{table}
+
+Finally we evaluated the large graphs with nodes 10,000 and 100,000 edges which used 4 sketches of sizes  8100, 8200, 8207, 8300.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+n    & e     & $G_0$=0 & $G_0$=1 & $G_0$=2 \\ \hline
+10,000 & 143,698  & 86.76   & 92.02  & 93.4  \\ \hline
+\end{tabular}
+\caption{Accuracy metrics for sketching with node queries on natural graphs}
 \end{table}
 
 These results shows the model is capable of working with natural graphs also, both when using automatic sketch creation and without using automatic sketch creation.
